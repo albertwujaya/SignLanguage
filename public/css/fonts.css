@@ -1,0 +1,10 @@
+/* Font self-host (SIL OFL). Subset Latin: cukup untuk Bahasa Indonesia. Tanpa internet pun tampil benar. */
+@font-face { font-family: 'Fredoka'; font-weight: 400; font-style: normal; font-display: swap; src: url('../fonts/fredoka-400.woff2') format('woff2'); }
+@font-face { font-family: 'Fredoka'; font-weight: 500; font-style: normal; font-display: swap; src: url('../fonts/fredoka-500.woff2') format('woff2'); }
+@font-face { font-family: 'Fredoka'; font-weight: 600; font-style: normal; font-display: swap; src: url('../fonts/fredoka-600.woff2') format('woff2'); }
+@font-face { font-family: 'Fredoka'; font-weight: 700; font-style: normal; font-display: swap; src: url('../fonts/fredoka-700.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 400; font-style: normal; font-display: swap; src: url('../fonts/nunito-400.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 600; font-style: normal; font-display: swap; src: url('../fonts/nunito-600.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 700; font-style: normal; font-display: swap; src: url('../fonts/nunito-700.woff2') format('woff2'); }
+@font-face { font-family: 'Nunito'; font-weight: 800; font-style: normal; font-display: swap; src: url('../fonts/nunito-800.woff2') format('woff2'); }
+@font-face { font-family: 'Caveat'; font-weight: 600; font-style: normal; font-display: swap; src: url('../fonts/caveat-600.woff2') format('woff2'); }

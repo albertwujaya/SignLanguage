@@ -1,0 +1,193 @@
+diff --git a/public/css/theme.css b/public/css/theme.css
+index 8993702..a74f129 100644
+--- a/public/css/theme.css
++++ b/public/css/theme.css
+@@ -638,3 +638,13 @@ .data-banner p { flex: 1 1 280px; margin: 0; font-weight: 700; line-height: 1.5;
+ @media (prefers-reduced-motion: reduce) {
+     .state-loader span { animation: none; }
+ }
++
++/* ---- Practice: hitung mundur di atas kamera ---- */
++.cam-countdown {
++    position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
++    font-weight: 800; font-size: clamp(4rem, 22vw, 9rem); color: #fff;
++    background: rgba(43, 33, 24, .5); text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
++    pointer-events: none;
++}
++.cam-countdown[hidden] { display: none; }
++.cam-key-hint { align-self: center; }
+diff --git a/public/js/app.js b/public/js/app.js
+index 9aa0b73..f1e5ad6 100644
+--- a/public/js/app.js
++++ b/public/js/app.js
+@@ -34,6 +34,7 @@
+     let cameraStream = null;
+     let cameraTimer = null;
+     let landmarkAnimId = null;
++    let practiceKeyHandler = null; // pintasan Spasi halaman Practice
+     let audioCtx = null;
+ 
+     // Helper functions
+@@ -540,9 +541,16 @@
+ 
+     async function initCamera(containerEl) {
+         try {
+-            cameraStream = await navigator.mediaDevices.getUserMedia({
+-                video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+-            });
++            // Stream yang masih hidup dipakai ulang (mis. pindah langkah Practice).
++            // Yang harus dibuat ulang hanya elemen <video> di viewport yang baru.
++            const alive = cameraStream && cameraStream.getTracks().some(t => t.readyState === 'live');
++            if (!alive) {
++                cameraStream = await navigator.mediaDevices.getUserMedia({
++                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
++                });
++            }
++            containerEl.querySelectorAll('video').forEach(v => v.remove());
++            if (landmarkAnimId) { cancelAnimationFrame(landmarkAnimId); landmarkAnimId = null; }
+             const video = document.createElement('video');
+             video.autoplay = true;
+             video.muted = true;
+@@ -550,6 +558,7 @@
+             video.setAttribute('aria-label', 'Live webcam feed for gesture detection');
+             video.srcObject = cameraStream;
+             containerEl.prepend(video);
++            video.play().catch(() => {});
+ 
+             startLandmarkTracking(containerEl, video);
+             return true;
+@@ -1212,6 +1221,24 @@
+         let isRunning = false;
+         let isSimulating = false;
+         let sessionSaved = false;
++        let autoRun = false; // true = sesi berjalan, langkah berikutnya mulai otomatis
++
++        // Spasi = mulai / jeda, supaya tidak perlu menekan tombol saat dua tangan dipakai.
++        if (practiceKeyHandler) document.removeEventListener('keydown', practiceKeyHandler);
++        practiceKeyHandler = (e) => {
++            if (!$('#practice-viewport-container')) {
++                document.removeEventListener('keydown', practiceKeyHandler);
++                practiceKeyHandler = null;
++                return;
++            }
++            if (e.code !== 'Space' || e.repeat) return;
++            const tag = ((e.target && e.target.tagName) || '').toLowerCase();
++            if (['input', 'textarea', 'select', 'button', 'a'].includes(tag)) return;
++            e.preventDefault();
++            const btn = $(autoRun ? '#btn-cam-pause' : '#btn-cam-start');
++            if (btn) btn.click();
++        };
++        document.addEventListener('keydown', practiceKeyHandler);
+ 
+         app.innerHTML = `
+         <section class="page wrap" aria-label="Real-time Gesture Practice">
+@@ -1229,8 +1256,14 @@
+             const container = $('#practice-viewport-container');
+             if (!container) return;
+ 
++            // Timer langkah sebelumnya memegang target lama; hentikan sebelum DOM diganti.
++            clearInterval(cameraTimer);
++            cameraTimer = null;
++            isRunning = false;
++
+             // Session Complete Screen
+             if (currentIndex >= 10) {
++                autoRun = false;
+                 stopCamera();
+                 const passedCount = sessionResults.filter(Boolean).length;
+                 const accuracy = Math.round((passedCount / 10) * 100);
+@@ -1285,6 +1318,7 @@
+                         <button class="cam-sim-badge" id="btn-toggle-sim" title="Switch between real camera and CV simulation mode">
+                             MODE: CAMERA READY
+                         </button>
++                        <div class="cam-countdown" id="cam-countdown" role="status" aria-live="assertive" hidden></div>
+                         <div class="cam-tracking-overlay" id="cam-tracking-box"></div>
+                         <div class="cam-result-card" id="cam-result-badge">
+                             <div>
+@@ -1302,6 +1336,7 @@
+                         <button class="btn p" id="btn-cam-start">START</button>
+                         <button class="btn" id="btn-cam-pause">PAUSE</button>
+                         <button class="btn" id="btn-cam-reset">RESET</button>
++                        <span class="meta cam-key-hint">SPASI = MULAI / JEDA</span>
+                         <button class="btn" id="btn-force-match" style="margin-left: auto; border-color: rgba(24,216,208,0.4);" title="Trigger instant AI match verification">
+                             TEST MATCH ✓
+                         </button>
+@@ -1420,24 +1455,65 @@
+                 }
+             };
+ 
+-            $('#btn-cam-start').onclick = async () => {
++            // Hitung mundur besar di layar (tidak bergantung bunyi), lalu mulai menilai.
++            let countdownToken = 0;
++            const runCountdown = (seconds) => new Promise(resolve => {
++                const el = $('#cam-countdown');
++                const token = ++countdownToken;
++                if (!el) return resolve(false);
++                let n = seconds;
++                el.hidden = false;
++                const tick = () => {
++                    if (token !== countdownToken || !el.isConnected) return resolve(false);
++                    if (n === 0) {
++                        el.textContent = 'MULAI!';
++                        setTimeout(() => {
++                            if (token === countdownToken) el.hidden = true;
++                            resolve(token === countdownToken);
++                        }, 500);
++                        return;
++                    }
++                    el.textContent = String(n--);
++                    setTimeout(tick, 1000);
++                };
++                tick();
++            });
++
++            const beginListening = async (seconds) => {
++                autoRun = true;
+                 await loadLetterModel();
+-                if (!cameraStream) {
++                if (!$('#camera-viewport')) return; // sudah pindah halaman
++                if (!$('#camera-viewport video')) {
+                     await initCamera($('#camera-viewport'));
+                 }
++                if (!autoRun || !$('#cam-tracking-box')) return;
++                const ok = await runCountdown(seconds);
++                if (!ok || !autoRun) return;
++                isRunning = true;
++                holdCount = 0;
+                 clearInterval(cameraTimer);
+                 cameraTimer = setInterval(evaluateGesture, LETTER.ready ? 250 : 3400);
+-                $('#cam-detected-word').textContent = `LISTENING FOR: ${idw(currentSign)}`;
++                const word = $('#cam-detected-word');
++                if (word) word.textContent = `LISTENING FOR: ${idw(currentSign)}`;
++            };
++
++            $('#btn-cam-start').onclick = () => {
+                 toast('Recognition active. Show gesture to camera.');
++                beginListening(3);
+             };
+ 
+             $('#btn-cam-pause').onclick = () => {
++                autoRun = false;
+                 isRunning = false;
++                countdownToken++;
++                const cd = $('#cam-countdown');
++                if (cd) cd.hidden = true;
+                 clearInterval(cameraTimer);
+                 toast('Practice paused');
+             };
+ 
+             $('#btn-cam-reset').onclick = () => {
++                autoRun = false;
+                 stopCamera();
+                 currentIndex = 0;
+                 sessionResults = [];
+@@ -1459,6 +1535,9 @@
+                     }
+                 };
+             });
++
++            // Sesi sedang berjalan: langkah baru mulai sendiri (hitung mundur 2 detik).
++            if (autoRun) beginListening(2);
+         }
+ 
+         renderPracticeStep();
