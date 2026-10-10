@@ -639,12 +639,21 @@ header #sb:hover { color: var(--ink); }
     .state-loader span { animation: none; }
 }
 
-/* ---- Practice: hitung mundur di atas kamera ---- */
-.cam-countdown {
-    position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
-    font-weight: 800; font-size: clamp(4rem, 22vw, 9rem); color: #fff;
-    background: rgba(43, 33, 24, .5); text-shadow: 0 2px 14px rgba(0, 0, 0, .55);
-    pointer-events: none;
+/* ==========================================================================
+   LOGO (public/images/logo.svg) di header
+   ========================================================================== */
+.logo { gap: 12px; }
+.logo-symbol { display: block; width: auto; height: 38px; flex: 0 0 auto; color: inherit; font-size: 0; }
+@media (max-width: 640px) {
+    .logo { gap: 8px; }
+    .logo-symbol { height: 32px; }
 }
-.cam-countdown[hidden] { display: none; }
-.cam-key-hint { align-self: center; }
+@media (max-width: 400px) {
+    .logo-text { font-size: 9px; letter-spacing: .05em; }
+}
+@media (max-width: 340px) {
+    .logo-text { display: none; } /* layar sangat sempit: hanya logo, supaya tombol Masuk/Daftar tetap muat */
+}
+@media (min-width: 480px) and (max-width: 560px) {
+    header #sb { min-width: 100px; } /* beri ruang untuk logo + nama di layar sedang */
+}

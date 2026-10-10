@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#F6EFDD">
-    <title>{{ $title }} | SigNesia</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
+    <title>{{ $title }} | Signesia</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -68,9 +69,8 @@
             font-size: 12px; font-weight: 800; letter-spacing: .14em; text-decoration: none;
             transition: transform .25s var(--ease), box-shadow .25s var(--ease), background-color .25s ease, color .25s ease;
         }
-        .brand-symbol { color: var(--cy); transition: color .25s ease; }
+        .brand-symbol { display: block; width: auto; height: 22px; margin: -2px 0; }
         .brand:hover { background: var(--mint); color: var(--paper); transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); }
-        .brand:hover .brand-symbol { color: var(--paper); }
         .brand:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 
         .story-copy { max-width: 540px; }
@@ -151,7 +151,7 @@
 </head>
 <body>
     <section class="story">
-        <a class="brand" href="{{ route('home') }}"><span class="brand-symbol">◇</span>SIGN LANGUAGE</a>
+        <a class="brand" href="{{ route('home') }}"><img class="brand-symbol" src="{{ asset('images/logo.svg') }}" alt="" width="18" height="22">SIGNESIA</a>
         <div class="story-copy">
             <span class="eyebrow">Belajar bisindo</span>
             <h1>Belajar bahasa isyarat, selangkah demi selangkah.</h1>

@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#F6EFDD">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
     <meta name="description" content="A clean, premium, immersive sign language learning, practice, translation, and dictionary platform.">
-    <title>SigNesia — Belajar Bisindo</title>
+    <title>Signesia — Belajar Bisindo</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,9 +19,9 @@
 <body>
     <!-- Minimalist Translucent Header -->
     <header id="hd">
-        <a href="#/" class="logo" aria-label="SIGN LANGUAGE home">
-            <span class="logo-symbol">◇</span>
-            <span class="logo-text">SIGN LANGUAGE</span>
+        <a href="#/" class="logo" aria-label="SIGNESIA home">
+            <img class="logo-symbol" src="{{ asset('images/logo.svg') }}" alt="" width="31" height="38">
+            <span class="logo-text">SIGNESIA</span>
             <span class="logo-badge">2026</span>
         </a>
         <nav class="top" aria-label="Primary Navigation">
@@ -56,7 +57,7 @@
     <footer class="site-footer">
         <div class="footer-wrap">
             <div class="footer-left">
-                <span class="meta cy">SigNesia</span>
+                <span class="meta cy">SIGN LANGUAGE / PROYEK LOMBA KAMPUS</span>
                 <p class="footer-desc">Pengenalan gestur lewat kamera masih berupa simulasi, dan isi kamus belum diverifikasi oleh penutur BISINDO.</p>
                 <a class="footer-link" href="#/about">Tentang kami</a>
             </div>
