@@ -1,4 +1,5 @@
 import math
+import re
 import sys
 import time
 from pathlib import Path
@@ -22,24 +23,47 @@ LABELS = parse_labels(sys.argv[1] if len(sys.argv) > 1 else "1-10")
 PERSON = sys.argv[2] if len(sys.argv) > 2 else "p1"
 TARGET = int(sys.argv[3]) if len(sys.argv) > 3 else 150
 CAM = int(sys.argv[4]) if len(sys.argv) > 4 else 0
-MODEL = "ml/models/hand_landmarker.task"
+# Path model dihitung dari lokasi file ini, jadi bisa dijalankan dari folder mana pun
+MODEL = str(Path(__file__).resolve().parents[1] / "models" / "hand_landmarker.task")
 
-# Angka yang butuh DUA tangan terlihat (angka 11 ke atas otomatis dua tangan).
-# Ubah daftar ini kalau ternyata ada angka lain yang juga dua tangan.
+# Label yang butuh DUA tangan terlihat (angka 11 ke atas otomatis dua tangan).
+# Untuk label huruf/kata, tambahkan nama folder-nya di sini (spasi sudah jadi "_").
 TWO_HANDS = {"6", "7", "8", "9", "10"}
+
+# Penyeragaman nama label supaya input kontributor berbeda tetap masuk ke folder yang sama.
+# Ubah ke "upper" kalau mau semuanya huruf besar, atau "none" untuk tidak mengubah huruf.
+LABEL_CASE = "lower"
+
+
+def norm_label(text):
+    """Seragamkan label: buang karakter terlarang, spasi jadi '_', lalu atur huruf besar/kecil."""
+    name = re.sub(r'[\\/:*?"<>|]', "", text).strip()
+    name = re.sub(r"\s+", "_", name)
+    if LABEL_CASE == "lower":
+        name = name.lower()
+    elif LABEL_CASE == "upper":
+        name = name.upper()
+    return name
+
+
+# Seragamkan label dari argumen (hapus duplikat, urutan tetap) dan daftar TWO_HANDS
+LABELS = list(dict.fromkeys(n for n in map(norm_label, LABELS) if n)) or ["1"]
+TWO_HANDS = {norm_label(x) for x in TWO_HANDS}
 
 # Folder foto di LUAR repo: <folder induk repo>/SignLanguage_dataset/own/<label>
 BASE = Path(__file__).resolve().parents[2].parent / "SignLanguage_dataset" / "own"
+print("Model:", MODEL, "| ada:", Path(MODEL).exists())
 print("Foto disimpan di:", BASE, "| daftar:", LABELS)
 
 idx = 0
 out = BASE / LABELS[0]
-exist = 0  # jumlah foto yang sudah ada di folder angka sekarang
+exist = 0  # jumlah foto yang sudah ada di folder label sekarang
 
 
 def goto(label):
-    """Pindah ke angka lain (boleh angka di luar daftar awal)."""
+    """Pindah ke label lain (boleh label di luar daftar awal)."""
     global idx, out, exist
+    label = norm_label(label)
     if label not in LABELS:
         LABELS.append(label)
     idx = LABELS.index(label)
@@ -65,6 +89,7 @@ landmarker = vision.HandLandmarker.create_from_options(
 cap = cv2.VideoCapture(CAM)
 t0 = time.monotonic()
 state, saved, count_end, last_save, typed = "idle", 0, 0.0, 0.0, ""
+typing = False  # True saat mode ketik (tombol T) aktif
 
 
 def put(img, text, y, scale=0.7):
@@ -99,9 +124,9 @@ while True:
             state = "done"
 
     view = cv2.flip(frame, 1)  # cermin hanya untuk tampilan
-    put(view, f"ANGKA {label} | sesi {saved}/{TARGET} | total di folder: {exist}", 35, 0.65)
+    put(view, f"LABEL {label} | sesi {saved}/{TARGET} | total di folder: {exist}", 35, 0.65)
     if state == "idle":
-        put(view, f"Bentuk angka {label} ({need} tangan). SPASI = mulai", 70)
+        put(view, f"Bentuk isyarat {label} ({need} tangan). SPASI = mulai", 70)
     elif state == "count":
         put(view, str(math.ceil(count_end - now)), 160, 3)
         put(view, "SPASI = batal", 70)
@@ -109,19 +134,44 @@ while True:
         put(view, "MEREKAM - gerakkan tangan sedikit" if has_hand else f"BUTUH {need} TANGAN TERLIHAT", 70)
         put(view, "SPASI = jeda", 100, 0.55)
     else:
-        nxt = f"SPASI = lanjut angka {LABELS[idx + 1]}" if has_next else "SELESAI SEMUA. SPASI = tambah lagi"
+        nxt = f"SPASI = lanjut label {LABELS[idx + 1]}" if has_next else "SELESAI SEMUA. SPASI = tambah lagi"
         put(view, nxt, 70)
-    if state in ("idle", "done"):
-        jump = f"Lompat ke: {typed}_ (ENTER)" if typed else "Ketik angka+ENTER = lompat | N/B = berikut/sebelum | Q = keluar"
+    if typing:
+        put(view, f"Ketik label: {typed}_  (ENTER = lompat, ESC = batal)", view.shape[0] - 15, 0.5)
+    elif state in ("idle", "done"):
+        jump = (
+            f"Lompat ke: {typed}_ (ENTER)"
+            if typed
+            else "Angka+ENTER = lompat | T = ketik huruf/kata | N/B = berikut/sebelum | Q = keluar"
+        )
         put(view, jump, view.shape[0] - 15, 0.5)
     cv2.imshow("Rekam dataset", view)
 
     key = cv2.waitKey(1) & 0xFF
-    if key == ord("q"):
+    if key == ord("q") and not typing:
         break
     if state in ("count", "rec"):
         if key == ord(" "):  # jeda / batal, foto yang sudah masuk tetap tersimpan
             state = "idle"
+        continue
+
+    # Mode ketik: semua karakter masuk sebagai teks label
+    if typing:
+        if key == 27:  # ESC = batal
+            typing, typed = False, ""
+        elif key in (13, 10):  # ENTER = lompat
+            name = norm_label(typed)
+            if name:
+                goto(name)
+                saved, state = 0, "idle"
+            typing, typed = False, ""
+        elif key == 8:  # backspace
+            typed = typed[:-1]
+        elif 32 <= key <= 126 and len(typed) < 30:
+            typed += chr(key)
+        continue
+    if key == ord("t"):  # masuk mode ketik
+        typing, typed = True, ""
         continue
 
     # state idle / done
