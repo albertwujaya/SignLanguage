@@ -72,7 +72,12 @@ def goto(label):
     exist = len(list(out.glob("*.jpg")))
 
 
+HANDS_OVERRIDE = {}  # diisi saat berjalan lewat tombol H: {label: 1 atau 2}
+
+
 def hands_needed(label):
+    if label in HANDS_OVERRIDE:
+        return HANDS_OVERRIDE[label]
     return 2 if (label in TWO_HANDS or (label.isdigit() and int(label) >= 11)) else 1
 
 
@@ -142,7 +147,7 @@ while True:
         jump = (
             f"Lompat ke: {typed}_ (ENTER)"
             if typed
-            else "Angka+ENTER = lompat | T = ketik huruf/kata | N/B = berikut/sebelum | Q = keluar"
+            else "Angka+ENTER = lompat | T = ketik | H = 1/2 tangan | N/B = berikut/sebelum | Q = keluar"
         )
         put(view, jump, view.shape[0] - 15, 0.5)
     cv2.imshow("Rekam dataset", view)
@@ -172,6 +177,9 @@ while True:
         continue
     if key == ord("t"):  # masuk mode ketik
         typing, typed = True, ""
+        continue
+    if key == ord("h"):  # ganti kebutuhan 1 tangan <-> 2 tangan untuk label ini
+        HANDS_OVERRIDE[label] = 1 if need == 2 else 2
         continue
 
     # state idle / done
