@@ -32,3 +32,5 @@ ml/dataset/raw/
 ml/models/*.joblib
 
 ml/dataset/own/
+
+__pycache__/

@@ -389,6 +389,21 @@
         return s.length === 1 ? s : '';
     };
 
+    // Model angka (dilatih terpisah: python ml/scripts/train.py angka)
+    const NUM = { ready: false, model: null, loading: null };
+    const NUMBER_WORDS = { ONE: '1', TWO: '2', THREE: '3', FOUR: '4', FIVE: '5', SIX: '6', SEVEN: '7', EIGHT: '8', NINE: '9', TEN: '10' };
+    const numberOf = g => (g && g.level === 'angka') ? (NUMBER_WORDS[((g.w || '').trim().toUpperCase())] || '') : '';
+    window.recogMode = 'huruf'; // 'huruf' atau 'angka'. Pose 2 dan V sama persis, jadi harus dipilih
+
+    function loadNumberModel() {
+        if (NUM.loading) return NUM.loading;
+        NUM.loading = fetch(`${MODEL_BASE}/number_model.json`)
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(m => { NUM.model = m; NUM.ready = true; return true; })
+            .catch(e => { console.warn('Model angka belum tersedia:', e); NUM.loading = null; return false; });
+        return NUM.loading;
+    }
+
     function buildFeatures(res) {
         const hands = res.landmarks;
         const sides = res.handedness || res.handednesses;
@@ -408,8 +423,7 @@
         return slots.Left.concat(slots.Right);
     }
 
-    function predictLetter(x) {
-        const m = LETTER.model;
+    function predictLetter(x, m = LETTER.model) {
         let a = x.map((v, i) => (v - m.mean[i]) / m.scale[i]);
         m.layers.forEach((L, li) => {
             const out = L.b.slice();
@@ -470,8 +484,8 @@
     async function startRealTracking(containerEl, videoEl) {
         const lm = await loadHandLandmarker();
         if (!lm) return false;
-        await loadLetterModel();
-        if (!cameraStream) return true; // kamera sudah dihentikan selama loading
+        await Promise.all([loadLetterModel(), loadNumberModel()]);
+        if (!cameraStream) return true;
 
         let canvas = containerEl.querySelector('.cam-landmark-canvas');
         if (!canvas) {
@@ -514,15 +528,17 @@
                     });
                 });
 
-                if (LETTER.ready) {
-                    recent.push(predictLetter(buildFeatures(res)));
+                const useNum = window.recogMode === 'angka' && NUM.ready;
+                if (useNum || LETTER.ready) {
+                    if (recent.mode !== window.recogMode) { recent.length = 0; recent.mode = window.recogMode; }
+                    recent.push(predictLetter(buildFeatures(res), useNum ? NUM.model : LETTER.model));
                     if (recent.length > 6) recent.shift();
                     const counts = {};
                     recent.forEach(r => { counts[r.letter] = (counts[r.letter] || 0) + 1; });
                     const top = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
                     const ps = recent.filter(r => r.letter === top).map(r => r.p);
                     const conf = Math.round((ps.reduce((s, v) => s + v, 0) / ps.length) * 100);
-                    const card = GESTURES.find(g => g.level === 'abjad' && letterOf(g) === top);
+                                        const card = useNum ? GESTURES.find(g => numberOf(g) === top) : GESTURES.find(g => g.level === 'abjad' && letterOf(g) === top);
                     window.latestRealGesture = { id: card ? card.id : top.toLowerCase(), w: top, letter: top, e: '', conf };
                 } else {
                     window.latestRealGesture = classifyHandLandmarks(res.landmarks[0]);;
@@ -1213,7 +1229,7 @@
     // PRACTICE VIEW (Real-Time Camera Recognition & Session Loop)
     // =========================================================================
     function practice(targetId) {
-        const letterPool = GESTURES.filter(g => g.level === 'abjad' && letterOf(g));
+        const letterPool = GESTURES.filter(g => (g.level === 'abjad' && letterOf(g)) || numberOf(g));
         const pool = letterPool.length ? letterPool : (GESTURES.length ? GESTURES.filter(g => g.c !== 'alpha') : []); [];
         let targetGesture = pool.find(g => g.id === targetId) || pool[0];
         
@@ -1401,8 +1417,10 @@
                 const detectedConf = $('#cam-detected-conf');
                 if (!trackingBox) return;
 
-                const targetLetter = letterOf(currentSign);
-                const useModel = !forcePass && LETTER.ready && targetLetter;
+                const isNum = !!numberOf(currentSign);
+                window.recogMode = isNum ? 'angka' : 'huruf';
+                const targetLetter = isNum ? numberOf(currentSign) : letterOf(currentSign);
+                const useModel = !forcePass && (isNum ? NUM.ready : LETTER.ready) && targetLetter;
                 let pass = forcePass;
                 let confidence = 88;
 
@@ -1486,7 +1504,7 @@
 
             const beginListening = async (seconds) => {
                 autoRun = true;
-                await loadLetterModel();
+                await Promise.all([loadLetterModel(), loadNumberModel()]);
                 if (!$('#camera-viewport')) return; // sudah pindah halaman
                 if (!$('#camera-viewport video')) {
                     await initCamera($('#camera-viewport'));
@@ -1552,6 +1570,7 @@
     // TRANSLATE VIEW (Gesture -> Text, Sentence Builder, Text -> Voice)
     // =========================================================================
     function translate() {
+        window.recogMode = 'huruf';
         let activeTab = 0; // 0: Gesture -> Text, 1: Sentence Builder, 2: Text -> Voice
         let sentenceWords = [
             GESTURES.find(g => g.id === 'hello') || { w: 'HELLO', e: '👋' },
@@ -1609,8 +1628,7 @@
                         </div>
                     </div>
 
-                    <textarea class="tts-textarea" id="tts-input" placeholder="Type something to convert into natural speech..." aria-label="Speech text input">Hello, thank you for communicating with sign  today.</textarea>
-language
+                    <textarea class="tts-textarea" id="tts-input" placeholder="Type something to convert into natural speech..." aria-label="Speech text input">Hello, thank you for communicating with sign language today.</textarea>
                     <div class="tts-controls-grid">
                         <div class="tts-field-group">
                             <label class="meta" for="tts-lang-select">LANGUAGE</label>
@@ -1713,6 +1731,7 @@ language
                             </div>
                             <div class="cam-controls-bar">
                                 <button class="btn p" id="btn-trans-cam-start">START CAMERA</button>
+                                <button class="btn" id="btn-trans-mode" onclick="window.recogMode = window.recogMode === 'angka' ? 'huruf' : 'angka'; this.textContent = 'MODE: ' + window.recogMode.toUpperCase();">MODE: HURUF</button>
                                 <button class="btn" id="btn-trans-simulate">+ SIMULATE GESTURE</button>
                             </div>
                         </div>

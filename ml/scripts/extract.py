@@ -30,7 +30,7 @@ def extract(res):
         slots[hd[0].category_name] = ((p - center) / scale).flatten()
     return np.concatenate([slots["Left"], slots["Right"]])
 
-rows, skipped = [], 0
+rows, skipped, n = [], 0, 0
 for root in SRC:
     if not root.exists():
         continue
@@ -39,6 +39,13 @@ for root in SRC:
             img = cv2.imread(str(img_path))
             if img is None:
                 continue
+            n += 1
+            if n % 200 == 0:
+                print(f"{n} foto diproses, {len(rows)} terdeteksi", flush=True)
+            h, w = img.shape[:2]
+            if max(h, w) > 960:
+                s = 960 / max(h, w)
+                img = cv2.resize(img, (int(w * s), int(h * s)))
             rgb = np.ascontiguousarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             res = detector.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb))
             feat = extract(res)
