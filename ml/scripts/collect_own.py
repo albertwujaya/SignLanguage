@@ -28,8 +28,7 @@ MODEL = "ml/models/hand_landmarker.task"
 # Ubah daftar ini kalau ternyata ada angka lain yang juga dua tangan.
 TWO_HANDS = {"6", "7", "8", "9", "10"}
 
-# Folder foto di LUAR repo: <folder induk repo>/SignLanguage_dataset/own/<label>
-BASE = Path(__file__).resolve().parents[2].parent / "SignLanguage_dataset" / "own"
+BASE = Path(__file__).resolve().parents[2] / "ml" / "dataset" / "own"
 print("Foto disimpan di:", BASE, "| daftar:", LABELS)
 
 idx = 0
