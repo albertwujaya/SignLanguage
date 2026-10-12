@@ -151,13 +151,67 @@
     }
 
     // =========================================================================
-    // HIGH-TECH SVG GESTURE VECTOR DIAGRAM ENGINE
-    // Renders futuristic glowing hand skeletons, motion arrows, and key points
+    // GESTURE MEDIA RENDERER
+    // Prioritas Tampilan:
+    // 1. video_file ada -> tampilkan video (<video>)
+    // 2. else image ada -> tampilkan gambar (<img>)
+    // 3. else -> ilustrasi vektor SVG lama (warna lewat CSS variable)
+    // =========================================================================
+    function renderGestureMedia(g, opts = {}) {
+        if (!g) return '';
+        const video = g.video_file || g.video_path || '';
+        const image = g.image || g.image_path || '';
+        const vkey = g.vkey || g.visual_key || '';
+        const word = g.w || g.word || '';
+        const label = idw(g) || word;
+        const cls = opts.className || '';
+        const isMini = Boolean(opts.mini);
+
+        if (video) {
+            const posterAttr = image ? ` poster="${escapeHtml(image)}"` : '';
+            return `
+            <div class="gesture-media-wrap ${cls}">
+                <video class="gesture-media-video"
+                    src="${escapeHtml(video)}"
+                    ${posterAttr}
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                    preload="metadata"
+                    aria-label="Video gerakan ${escapeHtml(label)}"
+                ></video>
+            </div>
+            `;
+        }
+
+        if (image) {
+            return `
+            <div class="gesture-media-wrap ${cls}">
+                <img class="gesture-media-image"
+                    src="${escapeHtml(image)}"
+                    alt="Poster gerakan ${escapeHtml(label)}"
+                    loading="lazy"
+                >
+            </div>
+            `;
+        }
+
+        // CADANGAN: Ilustrasi vektor SVG lama
+        return isMini
+            ? `<div class="mini-svg-diagram">${getGestureSVG(vkey, word)}</div>`
+            : getGestureSVG(vkey, word);
+    }
+
+    // =========================================================================
+    // HIGH-TECH SVG GESTURE VECTOR DIAGRAM ENGINE (CADANGAN)
+    // Renders glowing hand skeletons, motion arrows, and key points
+    // Warna diatur melalui CSS Variables (--cy, --mint, --paper)
     // =========================================================================
     function getGestureSVG(vkey, word = '') {
-        const strokeColor = '#18D8D0';
-        const mintColor = '#A8F3E5';
-        const nodeFill = '#F4F8F7';
+        const strokeColor = 'var(--cy, #18D8D0)';
+        const mintColor = 'var(--mint, #A8F3E5)';
+        const nodeFill = 'var(--paper, #F4F8F7)';
 
         // Base hand joint diagrams customized per visual key
         switch (vkey) {
@@ -1160,6 +1214,10 @@
             <ul class="word-list-grid" role="list" aria-label="Daftar kata ${cat[1]}">
                 ${list.map(g => {
                     const isLearned = learned.has(g.id);
+                    const thumbMedia = g.image
+                        ? `<img class="wli-thumb" src="${escapeHtml(g.image)}" alt="Stiker gerakan ${escapeHtml(idw(g))}" loading="lazy">`
+                        : `<span class="wli-thumb wli-thumb-placeholder">${escapeHtml(g.e || '👋')}</span>`;
+
                     return `
                     <li role="listitem">
                         <a class="word-list-item${isLearned ? ' is-learned' : ''}"
@@ -1171,6 +1229,7 @@
                                     : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>`
                                 }
                             </span>
+                            ${thumbMedia}
                             <div class="wli-text">
                                 <span class="wli-word">${idw(g)}</span>
                                 ${enw(g) ? `<span class="wli-en">${enw(g)}</span>` : ''}
@@ -1214,7 +1273,7 @@
                             <span class="pill cyan">${diffLabel(current.diff)}</span>
                         </div>
                         <div class="sign-anim-box">
-                            ${getGestureSVG(current.vkey, current.w)}
+                            ${renderGestureMedia(current, { className: 'flip-card-media' })}
                         </div>
                         <div class="sign-title-group">
                             <div>
@@ -1235,7 +1294,7 @@
                             <span class="pill cyan">KESULITAN: ${diffLabel(current.diff)}</span>
                         </div>
                         <div class="how-to-sign-grid">
-                            <div class="mini-svg-diagram">${getGestureSVG(current.vkey, current.w)}</div>
+                            ${renderGestureMedia(current, { mini: true, className: 'flip-back-media' })}
                             <div>
                                 <h3 class="how-to-title">${idw(current)}</h3>
                                 <p style="color: var(--t2); font-size: 14px; margin: 0;">${current.desc}</p>
@@ -1571,7 +1630,7 @@
                     </div>
 
                     <div class="sign-anim-box" style="margin: 16px 0; min-height: 160px;">
-                        ${getGestureSVG(currentSign.vkey, currentSign.w)}
+                        ${renderGestureMedia(currentSign, { className: 'practice-target-media' })}
                     </div>
 
                     <p style="color: var(--t2); font-size: 14px; line-height: 1.5; margin: 0 0 20px;">
@@ -1989,7 +2048,7 @@
 
                 tray.innerHTML = sentenceWords.map((item, idx) => `
                     <div class="sentence-block-chip" draggable="true" data-index="${idx}">
-                        <span>${item.e || '◇'}</span>
+                        ${item.image ? `<img src="${escapeHtml(item.image)}" alt="" class="sentence-chip-thumb">` : `<span>${item.e || '◇'}</span>`}
                         <b>${idw(item)}</b>
                         <button class="remove-chip-btn" data-del-index="${idx}" aria-label="Remove ${idw(item)}">✕</button>
                     </div>
@@ -2220,7 +2279,7 @@
                         </div>
 
                         <div class="gesture-card-preview">
-                            ${getGestureSVG(g.vkey, g.w)}
+                            ${renderGestureMedia(g, { className: 'dict-card-media' })}
                         </div>
 
                         <div class="gesture-card-meta">
@@ -2302,8 +2361,10 @@
         modal.innerHTML = `
         <div class="modal-box" role="dialog" aria-modal="true" aria-label="${idw(gesture)} details">
             <div class="modal-visual-side">
-                ${getGestureSVG(gesture.vkey, gesture.w)}
-                <div class="meta cy" style="margin-top: 18px;">BIOMECHANICAL VECTOR DIAGRAM</div>
+                ${renderGestureMedia(gesture, { className: 'modal-gesture-media' })}
+                <div class="meta cy" style="margin-top: 18px;">
+                    ${gesture.video_file ? 'VIDEO FOOTAGE GERAKAN' : (gesture.image ? 'POSTER GERAKAN' : 'BIOMECHANICAL VECTOR DIAGRAM')}
+                </div>
             </div>
 
             <div class="modal-info-side">
@@ -2442,10 +2503,14 @@
         if (words.length) {
             html += `<div class="meta cy" style="margin: 12px 0 6px;">RECOGNIZED GESTURES</div>`;
             words.forEach(g => {
+                const thumb = g.image
+                    ? `<img src="${escapeHtml(g.image)}" alt="" style="width:28px;height:28px;border-radius:6px;object-fit:cover;border:1.5px solid var(--ink);flex-shrink:0;">`
+                    : `<span style="font-size: 20px;">${g.e || '◇'}</span>`;
+
                 html += `
                 <button class="search-result-item" data-goto-gesture="${g.id}">
                     <div style="display: flex; align-items: center; gap: 14px;">
-                        <span style="font-size: 20px;">${g.e || '◇'}</span>
+                        ${thumb}
                         <div>
                             <b style="font-family: var(--font-heading); font-size: 16px;">${idw(g)}</b>
                             ${enw(g) ? `<span style="color: var(--cy); font-size: 11px; margin-left: 8px;">(${enw(g)})</span>` : ''}

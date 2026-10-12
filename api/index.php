@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
+
 // 1. Buat direktori sementara yang dibutuhkan di /tmp
 $directories = [
     '/tmp/storage/run',
@@ -11,7 +14,7 @@ $directories = [
 ];
 
 foreach ($directories as $directory) {
-    if (!file_exists($directory)) {
+    if (! file_exists($directory)) {
         mkdir($directory, 0755, true);
     }
 }
@@ -25,17 +28,17 @@ putenv('APP_PACKAGES_CACHE=/tmp/bootstrap/cache/packages.php');
 putenv('APP_ROUTES_CACHE=/tmp/bootstrap/cache/routes.php');
 
 // 3. Load Autoload & Inisialisasi App
-require __DIR__ . '/../vendor/autoload.php';
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+require __DIR__.'/../vendor/autoload.php';
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
 // 4. Set storage path pada instance Laravel
 $app->useStoragePath('/tmp/storage');
 
 // 5. Jalankan Kernel Aplikasi
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+$kernel = $app->make(Kernel::class);
 
 $response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
+    $request = Request::capture()
 );
 
 // BAHAN PERBAIKAN: Paksa Vercel & Browser untuk TIDAK menyimpan cache halaman
