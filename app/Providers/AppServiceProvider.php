@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Gate;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,9 +21,8 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
-
-        Gate::define('access-admin', function (User $user) {
-            return strtolower($user->role) === 'admin';
-        });
+        Gate::define('access-admin', fn (User $user): bool => $user->isStaff());
+        Gate::define('manage-users', fn (User $user): bool => $user->isAdmin());
+        Gate::define('delete-gestures', fn (User $user): bool => $user->isAdmin());
     }
 }
