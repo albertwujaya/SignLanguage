@@ -488,12 +488,167 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
+        /* ======================== RESPONSIVE HP (<640px) ======================== */
         @media (max-width: 640px) {
+            .wrap {
+                padding: 16px 14px 60px;
+                gap: 20px;
+            }
+            .bar {
+                padding: 12px 14px;
+                gap: 10px;
+            }
+            .btn-back {
+                padding: 7px 14px;
+                font-size: 12.5px;
+                gap: 6px;
+            }
+            .btn-back svg {
+                width: 15px;
+                height: 15px;
+            }
+            .brand-badge-group {
+                gap: 10px;
+            }
+            .brand-pill {
+                font-size: 13.5px;
+                gap: 6px;
+            }
+            .brand-pill img {
+                width: 18px;
+                height: 22px;
+            }
+            .btn-logout {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            .profile-hero {
+                padding: 18px 16px;
+                gap: 16px;
+            }
+            .profile-user-left {
+                gap: 14px;
+            }
+            .profile-avatar {
+                width: 52px;
+                height: 52px;
+                font-size: 22px;
+            }
+            .profile-info h1 {
+                font-size: 20px;
+            }
+            .btn-admin-cta {
+                width: 100%;
+                justify-content: center;
+                padding: 9px 14px;
+                font-size: 12.5px;
+                box-sizing: border-box;
+            }
+            .card {
+                padding: 18px 14px;
+                border-radius: 12px;
+            }
+            .card-header h2 {
+                font-size: 18px;
+            }
+            .page-j {
+                padding: 18px 12px 20px 32px;
+                border-radius: 4px 14px 14px 4px;
+            }
+            .page-j::before {
+                left: 9px;
+                top: 14px;
+                bottom: 14px;
+            }
+            .page-j h3 {
+                font-size: 17px;
+            }
+            .note {
+                font-size: 17px;
+                margin-bottom: 8px;
+            }
+            .stickers-shelf {
+                gap: 8px;
+            }
+            .sticker-card, .sticker-target {
+                width: calc(33.333% - 6px);
+                min-width: 84px;
+                max-width: 105px;
+                min-height: 96px;
+                padding: 6px 4px;
+                box-sizing: border-box;
+            }
+            .sticker-thumb {
+                height: 42px;
+            }
+            .sticker-thumb .em {
+                font-size: 24px;
+            }
+            .sticker-thumb .char-badge {
+                width: 28px;
+                height: 28px;
+                font-size: 18px;
+            }
+            .sticker-name {
+                font-size: 10.5px;
+            }
+            .sticker-status {
+                font-size: 8px;
+                padding: 1px 4px;
+            }
+            .score-summary-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+            .score-stat-box {
+                padding: 10px 12px;
+            }
+            .score-stat-box .stat-label {
+                font-size: 10.5px;
+            }
+            .score-stat-box .stat-value {
+                font-size: 20px;
+            }
+            .table-wrap {
+                border-radius: 8px;
+                -webkit-overflow-scrolling: touch;
+            }
+            th, td {
+                padding: 9px 10px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+            .badge-score-pill {
+                padding: 2px 7px;
+                font-size: 11px;
+            }
             .account-form-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
             }
             .account-form-grid .field[style*="grid-column"] {
                 grid-column: 1 !important;
+            }
+            input {
+                padding: 9px 12px;
+                font-size: 14px;
+            }
+            .btn-submit {
+                width: 100%;
+                padding: 12px 18px;
+                font-size: 14px;
+            }
+        }
+        @media (max-width: 380px) {
+            .btn-back span {
+                display: none;
+            }
+            .btn-back::after {
+                content: "Kembali";
+            }
+            .brand-pill span {
+                display: none;
             }
         }
         .field { margin: 0; }

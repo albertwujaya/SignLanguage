@@ -198,7 +198,7 @@
 
                 <form class="account-form" method="POST" action="{{ route('admin.users.store') }}">
                     @csrf
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px">
                         {{-- Baris 1: Nama dan Email --}}
                         <div class="field" style="margin:0">
                             <label for="name" style="font-size:13px;font-weight:600">Nama</label>

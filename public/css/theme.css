@@ -450,6 +450,14 @@ nav.top a::after { display: none; }
     .cat-row:hover { padding-left: 16px; }
     .cat-row-title h3 { font-size: 22px; }
     .lesson-top-bar { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+    .word-list-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+    .word-list-item { min-height: 72px; padding: 12px 14px; gap: 10px; }
+    .wli-check { width: 26px; height: 26px; }
+    .wli-word { font-size: 14.5px; }
+    .wli-en { font-size: 10.5px; }
+    .wli-meta { gap: 6px; }
+    .wli-diff.pill { padding: 2.5px 8px; font-size: 9px; }
+    .lesson-back-btn { padding: 7px 14px !important; font-size: 12px !important; }
     .flip-card { height: clamp(540px, 80svh, 640px); }
     .flip-face { padding: 18px; }
     .sign-anim-box { min-height: 0; margin: 10px 0; }
