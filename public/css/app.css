@@ -681,16 +681,21 @@ main {
 
 .cat-row {
     display: grid;
-    grid-template-columns: 90px 1.4fr 1.6fr 180px auto;
-    gap: 32px;
+    grid-template-columns: 68px 1.5fr 1fr 180px auto;
+    gap: 24px;
     align-items: center;
-    padding: 36px 20px;
+    padding: 28px 24px;
     border-top: 1px solid var(--line);
     width: 100%;
     text-align: left;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     border-radius: var(--radius-sm);
     cursor: pointer;
+}
+
+.cat-row.is-disabled {
+    opacity: 0.55;
+    cursor: default;
 }
 
 .cat-row:last-child {
@@ -705,14 +710,14 @@ main {
 
 .cat-row-num {
     font-family: var(--font-heading);
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 700;
     color: var(--cy);
 }
 
 .cat-row-title h3 {
-    font-size: clamp(24px, 2.6vw, 36px);
-    margin-bottom: 6px;
+    font-size: clamp(20px, 2.2vw, 30px);
+    margin-bottom: 4px;
     color: var(--t1);
     transition: color 0.2s;
 }
@@ -723,28 +728,50 @@ main {
 
 .cat-row-title .desc {
     color: var(--t2);
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
-.cat-badges-preview {
+/* ---- Meta: jumlah gesture + badge status ---- */
+.cat-row-meta {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 8px;
+    align-items: flex-start;
 }
 
-.cat-gesture-tag {
-    font-size: 11px;
-    padding: 4px 10px;
-    background: rgba(11, 41, 44, 0.7);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    color: var(--t2);
+.cat-count-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-family: var(--font-heading);
-    letter-spacing: 0.08em;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--t2);
+    letter-spacing: 0.04em;
 }
 
+.cat-status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill, 999px);
+    border: 1.5px solid;
+}
+
+.cat-status-new { color: var(--t3); border-color: var(--line); background: transparent; }
+.cat-status-progress { color: #7c4a00; border-color: #f2b45a; background: rgba(242,180,90,.18); }
+.cat-status-done { color: #2a5c2a; border-color: #7fa87a; background: rgba(127,168,122,.18); }
+.cat-status-empty { color: var(--t3); border-color: var(--line-dim); background: transparent; }
+
+/* ---- Progress bar & label ---- */
 .cat-progress-wrap {
-    min-width: 140px;
+    min-width: 120px;
 }
 
 .cat-progress-bar {
@@ -752,7 +779,7 @@ main {
     background: var(--bg4);
     border-radius: var(--radius-pill);
     overflow: hidden;
-    margin: 8px 0;
+    margin-bottom: 6px;
 }
 
 .cat-progress-bar b {
@@ -761,6 +788,15 @@ main {
     background: linear-gradient(90deg, var(--cy), var(--mint));
     border-radius: var(--radius-pill);
     transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cat-progress-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--t3);
+    font-weight: 600;
 }
 
 .cat-arrow {

@@ -158,7 +158,7 @@
             <h1>Belajar bahasa isyarat, selangkah demi selangkah.</h1>
             <p>Masuk untuk menyimpan progres, nilai latihan, dan melanjutkan belajar dari perangkat mana pun.</p>
         </div>
-        <span class="story-foot">BISINDO · SIBI · ASL</span>
+        <span class="story-foot">BISINDO</span>
     </section>
     <main class="form-side">
         <div class="form-wrap">@yield('content')</div>

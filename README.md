@@ -58,7 +58,7 @@ SIGN LANGUAGE
 ## 3. Technology Stack
 
 - **Backend**: Laravel 13 (PHP 8.2+ via XAMPP)
-- **Database**: SQLite with complete migration & seeder (32 gestures with BISINDO / SIBI / ASL standards)
+- **Database**: SQLite with complete migration & seeder (32 gestures with BISINDO)
 - **Frontend**: Vanilla JavaScript (ES6+ modular SPA with hash routing), modern CSS variables, and Web Audio API
 - **Computer Vision**: HTML5 MediaDevices Webcam integration + Canvas-rendered 21-point hand landmark skeleton
 - **Speech Synthesis**: Web Speech API (`SpeechSynthesisUtterance`) with support for Indonesian (`id-ID`) and English (`en-US`)

@@ -1075,29 +1075,35 @@
                     const count = list.length;
                     const done = list.filter(g => learned.has(g.id)).length;
                     const pct = count ? Math.round((done / count) * 100) : 0;
-                    const sampleBadges = list.slice(0, 4).map(g => `<span class="cat-gesture-tag">${idw(g)}</span>`).join('');
-
-                    const emptyNote = count === 0
-                        ? `<span class="meta" style="color:var(--t3)">Materi segera hadir</span>`
-                        : '';
+                    const isEmpty = count === 0;
+                    const doneAll = !isEmpty && done === count;
+                    const statusBadge = isEmpty
+                        ? `<span class="cat-status-badge cat-status-empty">Segera Hadir</span>`
+                        : doneAll
+                        ? `<span class="cat-status-badge cat-status-done">Selesai</span>`
+                        : done > 0
+                        ? `<span class="cat-status-badge cat-status-progress">Sedang Belajar</span>`
+                        : `<span class="cat-status-badge cat-status-new">Belum Dimulai</span>`;
 
                     return `
-                    <div class="cat-row" data-cat="${c[0]}" role="listitem" tabindex="0" aria-label="${c[1]} category, ${count} lessons">
+                    <div class="cat-row${isEmpty ? ' is-disabled' : ''}" data-cat="${c[0]}" role="listitem" tabindex="${isEmpty ? -1 : 0}" aria-label="${c[1]}, ${count} gesture">
                         <div class="cat-row-num">${pad(idx + 1)}</div>
                         <div class="cat-row-title">
                             <h3>${c[1]}</h3>
                             <span class="desc">${c[2]}</span>
                         </div>
-                        <div class="cat-badges-preview">
-                            ${sampleBadges || emptyNote}
-                            ${count > 4 ? `<span class="cat-gesture-tag">+${count - 4} MORE</span>` : ''}
+                        <div class="cat-row-meta">
+                            <div class="cat-count-pill">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                                ${isEmpty ? 'Belum ada materi' : `${count} gesture`}
+                            </div>
+                            ${statusBadge}
                         </div>
                         <div class="cat-progress-wrap">
-                            <div class="meta">${done}/${count} LESSONS</div>
                             <div class="cat-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
                                 <b style="width: ${pct}%;"></b>
                             </div>
-                            <div class="meta cy">${pct}% COMPLETE</div>
+                            <div class="cat-progress-label"><span>${done}/${count}</span><span class="meta cy">${pct}%</span></div>
                         </div>
                         <div class="cat-arrow">→</div>
                     </div>
