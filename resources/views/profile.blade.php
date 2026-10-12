@@ -485,8 +485,16 @@
         /* ---- FORM EDIT DATA AKUN ---- */
         .account-form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 16px;
+        }
+        @media (max-width: 640px) {
+            .account-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .account-form-grid .field[style*="grid-column"] {
+                grid-column: 1 !important;
+            }
         }
         .field { margin: 0; }
         label { display: block; margin-bottom: 6px; font-weight: 700; font-size: 13px; }
@@ -773,9 +781,9 @@
                         @error('email')<div class="error">{{ $message }}</div>@enderror
                     </div>
 
-                    <div class="field">
+                    <div class="field" style="grid-column: 1 / -1">
                         <label for="current_password">Kata Sandi Saat Ini</label>
-                        <input id="current_password" type="password" name="current_password" autocomplete="current-password" placeholder="Isi jika ingin ganti sandi">
+                        <input id="current_password" type="password" name="current_password" autocomplete="current-password" placeholder="Isi kata sandi saat ini jika ingin mengganti sandi">
                         @error('current_password')<div class="error">{{ $message }}</div>@enderror
                     </div>
 
@@ -785,7 +793,7 @@
                         @error('password')<div class="error">{{ $message }}</div>@enderror
                     </div>
 
-                    <div class="field" style="grid-column: 1 / -1">
+                    <div class="field">
                         <label for="password_confirmation">Ulangi Kata Sandi Baru</label>
                         <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" placeholder="Ketik ulang kata sandi baru">
                     </div>
