@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#F6EFDD">
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
+    <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
     <title>{{ $title }} | Signesia</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -151,7 +152,7 @@
 </head>
 <body>
     <section class="story">
-        <a class="brand" href="{{ route('home') }}"><img class="brand-symbol" src="{{ asset('images/logo.svg') }}" alt="" width="18" height="22">SIGNESIA</a>
+        <a class="brand" href="{{ route('home') }}"><img class="brand-symbol" src="{{ asset('images/logo.svg') }}" alt="" width="18" height="22">Signesia</a>
         <div class="story-copy">
             <span class="eyebrow">Belajar bisindo</span>
             <h1>Belajar bahasa isyarat, selangkah demi selangkah.</h1>

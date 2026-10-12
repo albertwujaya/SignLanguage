@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Profil | Sign Language</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
+    <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
+    <title>Profil | SIGNESIA</title>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fredoka:wght@500;600;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         /* Sementara: gaya sederhana. Akan diganti saat redesign tahap 2. */

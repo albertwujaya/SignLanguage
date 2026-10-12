@@ -188,11 +188,18 @@ class StudentFeaturesTest extends TestCase
      */
     private function gesture(string $slug, array $overrides = []): array
     {
+        $level = $overrides['level'] ?? 'kata';
+        $defaultCategory = match ($level) {
+            'abjad' => 'alpha',
+            'angka' => 'num',
+            default => 'greet',
+        };
+
         return array_merge([
             'slug' => $slug,
             'word' => strtoupper($slug),
-            'category' => 'greet',
-            'level' => 'kata',
+            'category' => $defaultCategory,
+            'level' => $level,
             'difficulty' => 'Easy',
             'description' => 'Deskripsi '.$slug,
         ], $overrides);

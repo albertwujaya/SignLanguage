@@ -141,9 +141,11 @@
             .catch(() => toast('Progres belum tersimpan ke akun. Coba lagi.'));
     }
 
-    function saveSession(correct, total, seconds) {
+    function saveSession(correct, total, seconds, level = null) {
         if (!AUTH.loggedIn) return;
-        apiRequest(AUTH.sessionUrl, 'POST', { total, correct, duration_seconds: seconds })
+        const payload = { total, correct, duration_seconds: seconds };
+        if (level) payload.level = level;
+        apiRequest(AUTH.sessionUrl, 'POST', payload)
             .then(() => toast('Sesi latihan tersimpan di akunmu'))
             .catch(() => toast('Sesi latihan belum tersimpan. Coba lagi.'));
     }
@@ -781,7 +783,7 @@
         stopCamera();
         closeModal();
         const hash = location.hash || '#/';
-        const [page, param] = hash.slice(2).split('/');
+        const [page, param, slug] = hash.slice(2).split('/');
 
         // Highlight active nav links
         $$('nav.top a, .bn a').forEach(el => {
@@ -791,7 +793,7 @@
 
         const routes = {
             '': home,
-            'learn': () => learn(param),
+            'learn': () => learn(param, slug),
             'practice': () => practice(param),
             'translate': translate,
             'dictionary': dictionary,
@@ -854,7 +856,7 @@
             </div>
 
             <div class="about-block about-intro">
-                <p class="about-text">SigNesia adalah proyek yang kami ikutkan dalam lomba di kampus. Tujuannya untuk membantu orang yang ingin mulai belajar Bahasa Isyarat Indonesia (BISINDO), dari abjad dan kata sehari-hari sampai kalimat pendek, tanpa perlu memasang aplikasi.</p>
+                <p class="about-text">Signesia adalah proyek yang kami ikutkan dalam lomba di kampus. Tujuannya untuk membantu orang yang ingin mulai belajar Bahasa Isyarat Indonesia (BISINDO), dari abjad dan kata sehari-hari sampai kalimat pendek, tanpa perlu memasang aplikasi.</p>
                 <p class="about-text">Kami sendiri masih belajar. Karena itu halaman ini sengaja jujur tentang bagian yang sudah jalan dan bagian yang masih dalam proses.</p>
             </div>
 
@@ -980,7 +982,7 @@
                         <span class="kicker-line"></span>
                         <span class="meta cy">LEARN. PRACTICE. COMMUNICATE.</span>
                     </div>
-                    <h1 class="big">SIGNESIA</h1>
+                    <h1 class="big">Signesia</h1>
                 </div>
                 <div class="hero-r">
                     <p class="hero-description">
@@ -1316,212 +1318,114 @@
         };
     }
 
+    // =========================================================================
+    // PRACTICE VIEW — Tahap 3: Pemilihan Kategori & Latihan per Kategori
+    // =========================================================================
+    function practice(param) {
+        // Jika param adalah kategori yang dikenal ATAU sebuah gesture slug
+        let targetCategory = null;
+        let singleTargetGesture = null;
 
-        const totalLearned = learned.size;
-        const totalSigns = GESTURES.length || 32;
-        const totalProgress = Math.round((totalLearned / totalSigns) * 100);
-
-        app.innerHTML = `
-        <section class="page wrap" aria-label="Learning Curriculum">
-            <div class="page-header">
-                <div class="meta">01 / LEARN</div>
-                <h1 class="big">LEARN</h1>
-                <p class="sub">Build your vocabulary, one gesture at a time.</p>
-                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
-                    <span class="pill cyan">TOTAL PROGRESS: ${totalProgress}%</span>
-                    <span class="meta">${totalLearned} OF ${totalSigns} GESTURES MASTERED</span>
-                </div>
-            </div>
-
-            <div class="level-tabs" role="tablist" aria-label="Jenjang belajar">
-                ${['all', 'abjad', 'angka', 'kata', 'kalimat'].map(l => `<button class="level-tab${learnLevel === l ? ' on' : ''}" role="tab" aria-selected="${learnLevel === l}" data-level="${l}">${l === 'all' ? 'SEMUA' : LEVEL_LABELS[l]}</button>`).join('')}
-            </div>
-            ${learnLevel !== 'all' && !GESTURES.some(g => g.level === learnLevel) ? `<p class="sub" style="margin:18px 0">Belum ada materi jenjang ${LEVEL_LABELS[learnLevel].toLowerCase()}. Admin bisa menambahkannya dari panel admin.</p>` : ''}
-
-            <div class="category-list" role="list">
-                ${CATS.filter(c => learnLevel === 'all' || byCatL(c[0]).length).map((c, idx) => {
-                    const list = byCatL(c[0]);
-                    const count = list.length;
-                    const done = list.filter(g => learned.has(g.id)).length;
-                    const pct = count ? Math.round((done / count) * 100) : 0;
-                    const sampleBadges = list.slice(0, 4).map(g => `<span class="cat-gesture-tag">${idw(g)}</span>`).join('');
-
-                    return `
-                    <div class="cat-row" data-cat="${c[0]}" role="listitem" tabindex="0" aria-label="${c[1]} category, ${count} lessons">
-                        <div class="cat-row-num">${pad(idx + 1)}</div>
-                        <div class="cat-row-title">
-                            <h3>${c[1]}</h3>
-                            <span class="desc">${c[2]}</span>
-                        </div>
-                        <div class="cat-badges-preview">
-                            ${sampleBadges}
-                            ${count > 4 ? `<span class="cat-gesture-tag">+${count - 4} MORE</span>` : ''}
-                        </div>
-                        <div class="cat-progress-wrap">
-                            <div class="meta">${done}/${count} LESSONS</div>
-                            <div class="cat-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
-                                <b style="width: ${pct}%;"></b>
-                            </div>
-                            <div class="meta cy">${pct}% COMPLETE</div>
-                        </div>
-                        <div class="cat-arrow">→</div>
-                    </div>
-                    `;
-                }).join('')}
-            </div>
-        </section>
-        `;
-
-        $$('.cat-row').forEach(row => {
-            const go = () => { location.hash = '#/learn/' + row.dataset.cat; };
-            row.onclick = go;
-            row.onkeydown = e => { if (e.key === 'Enter') go(); };
-        });
-    }
-
-    // Interactive 3D Flip Card Lesson Detail
-    function renderLessonDetail(cat, index) {
-        const list = byCatL(cat[0]);
-        if (!list.length) return learn();
-        const current = list[index];
-        const isDone = learned.has(current.id);
-
-        app.innerHTML = `
-        <section class="page wrap" aria-label="Interactive Lesson Flashcard">
-            <div class="lesson-top-bar">
-                <a href="#/learn" class="lesson-back-btn">
-                    <span>←</span> BACK TO CURRICULUM
-                </a>
-                <div class="meta cy">
-                    ${cat[1]} / LESSON ${pad(index + 1)} OF ${pad(list.length)}
-                </div>
-            </div>
-
-            <div class="flip-scene">
-                <div class="flip-card" id="lesson-flip-card" role="button" tabindex="0" aria-label="Interactive flashcard for ${idw(current)}. Press to flip front and back.">
-                    <!-- FRONT FACE -->
-                    <div class="flip-face flip-front">
-                        <div class="flip-header">
-                            <span class="meta">${cat[1]}</span>
-                            <span class="pill cyan">${diffLabel(current.diff)}</span>
-                        </div>
-
-                        <div class="sign-anim-box">
-                            ${getGestureSVG(current.vkey, current.w)}
-                        </div>
-
-                        <div class="sign-title-group">
-                            <div>
-                                <h2>${idw(current)}</h2>
-                                ${enw(current) ? `<div class="sign-id-trans">ENGLISH: ${enw(current)}</div>` : ''}
-                            </div>
-                            <div class="tap-reveal-hint">
-                                <span>TAP TO REVEAL</span>
-                                <span>↻</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- BACK FACE (HOW TO SIGN) -->
-                    <div class="flip-face flip-back">
-                        <div class="flip-header">
-                            <span class="meta cy">HOW TO SIGN</span>
-                            <span class="pill cyan">KESULITAN: ${diffLabel(current.diff)}</span>
-                        </div>
-
-                        <div class="how-to-sign-grid">
-                            <div class="mini-svg-diagram">
-                                ${getGestureSVG(current.vkey, current.w)}
-                            </div>
-                            <div>
-                                <h3 class="how-to-title">${idw(current)}</h3>
-                                <p style="color: var(--t2); font-size: 14px; margin: 0;">${current.desc}</p>
-                            </div>
-                        </div>
-
-                        <div class="lesson-steps-grid">
-                            <div class="lesson-step-block">
-                                <div class="meta cy">HAND POSITION</div>
-                                <p>${current.pos || 'Standard upright hand orientation.'}</p>
-                            </div>
-                            <div class="lesson-step-block">
-                                <div class="meta cy">MOVEMENT DIRECTION</div>
-                                <p>${current.mv || 'Smooth deliberate motion in neutral space.'}</p>
-                            </div>
-                            <div class="lesson-step-block">
-                                <div class="meta meta-warn">COMMON MISTAKE</div>
-                                <p>${current.mis || 'Failing to isolate finger movements cleanly.'}</p>
-                            </div>
-                            <div class="lesson-step-block">
-                                <div class="meta cy">CULTURAL STANDARD</div>
-                                <p>BISINDO & SIBI Recognized Dialect Representation.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Controls Bar -->
-            <div class="lesson-controls">
-                <button class="btn" id="btn-prev-lesson" ${index === 0 ? 'disabled' : ''}>PREVIOUS</button>
-                <button class="btn p" id="btn-mark-learned">
-                    ${isDone ? 'LEARNED ✓' : 'MARK AS LEARNED'}
-                </button>
-                <button class="btn" id="btn-next-lesson" ${index >= list.length - 1 ? 'disabled' : ''}>NEXT</button>
-            </div>
-
-            <div class="lesson-controls" style="margin-top: 14px;">
-                <a class="btn sm" href="#/practice/${current.id}">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    PRACTICE THIS GESTURE IN CAMERA
-                </a>
-            </div>
-        </section>
-        `;
-
-        const card = $('#lesson-flip-card');
-        const flipAction = () => {
-            card.classList.toggle('is-flipped');
-            playBeep('flip');
-        };
-        card.onclick = flipAction;
-        card.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipAction(); } };
-
-        const prevBtn = $('#btn-prev-lesson');
-        const nextBtn = $('#btn-next-lesson');
-        const markBtn = $('#btn-mark-learned');
-
-        if (prevBtn) prevBtn.onclick = () => renderLessonDetail(cat, index - 1);
-        if (nextBtn) nextBtn.onclick = () => renderLessonDetail(cat, index + 1);
-
-        markBtn.onclick = () => {
-            if (learned.has(current.id)) {
-                learned.delete(current.id);
-                markBtn.textContent = 'MARK AS LEARNED';
-                toast(`${idw(current)} marked as unlearned`);
+        if (param) {
+            const foundCat = CATS.find(c => c[0] === param);
+            if (foundCat) {
+                targetCategory = foundCat;
             } else {
-                learned.add(current.id);
-                markBtn.textContent = 'LEARNED ✓';
-                playBeep('success');
-                toast(`${idw(current)} marked as learned`);
+                const foundGesture = GESTURES.find(g => g.id === param);
+                if (foundGesture) {
+                    singleTargetGesture = foundGesture;
+                    targetCategory = CATS.find(c => c[0] === foundGesture.c) || null;
+                }
             }
-            syncLearned(current.id, learned.has(current.id));
-            saveState();
-        };
-    }
-    // =========================================================================
-    // PRACTICE VIEW (Real-Time Camera Recognition & Session Loop)
-    // =========================================================================
-    function practice(targetId) {
-        const letterPool = GESTURES.filter(g => (g.level === 'abjad' && letterOf(g)) || numberOf(g));
-        const pool = letterPool.length ? letterPool : (GESTURES.length ? GESTURES.filter(g => g.c !== 'alpha') : []); [];
-        let targetGesture = pool.find(g => g.id === targetId) || pool[0];
-        
-        // 10 session items
-        const sessionItems = Array.from({ length: 10 }, (_, idx) => {
-            if (idx === 0 && targetGesture) return targetGesture;
-            return pool[(idx + 2) % pool.length] || { w: 'HELLO', id: 'hello', desc: 'Raise open hand' };
-        });
+        }
+
+        // Screen 1: Layar Pilih Kategori jika belum ada kategori yang dipilih
+        if (!targetCategory && !singleTargetGesture) {
+            app.innerHTML = `
+            <section class="page wrap" aria-label="Pilih Kategori Latihan">
+                <div class="page-header">
+                    <div class="meta">02 / PRACTICE</div>
+                    <h1 class="big">PRACTICE</h1>
+                    <p class="sub">Pilih kategori untuk memulai sesi latihan mandiri berbasis kamera.</p>
+                </div>
+
+                <div class="category-list" role="list">
+                    ${CATS.map((c, idx) => {
+                        const list = byCatL(c[0]);
+                        const count = list.length;
+                        const isAvailable = count > 0;
+                        const sampleBadges = list.slice(0, 4).map(g => `<span class="cat-gesture-tag">${idw(g)}</span>`).join('');
+                        const moreBadge = count > 4 ? `<span class="cat-gesture-tag">+${count - 4} MORE</span>` : '';
+
+                        return `
+                        <div class="cat-row ${isAvailable ? '' : 'is-disabled'}"
+                             ${isAvailable ? `data-practice-cat="${c[0]}" tabindex="0" role="button"` : 'aria-disabled="true"'}
+                             style="${isAvailable ? 'cursor:pointer;' : 'opacity:0.55;cursor:not-allowed;'}"
+                             aria-label="${c[1]} — ${isAvailable ? count + ' kartu terbit' : 'Belum ada kartu terbit'}">
+                            <div class="cat-row-num">${pad(idx + 1)}</div>
+                            <div class="cat-row-title">
+                                <h3>${c[1]}</h3>
+                                <span class="desc">${c[2]}</span>
+                            </div>
+                            <div class="cat-badges-preview">
+                                ${isAvailable
+                                    ? `<span class="cat-gesture-tag" style="font-weight:700">${count} GESTURE</span>${sampleBadges}${moreBadge}`
+                                    : `<span class="meta" style="color:var(--t3)">Belum ada kartu terbit (materi segera hadir)</span>`
+                                }
+                            </div>
+                            <div class="cat-arrow">
+                                ${isAvailable ? 'MULAI →' : '—'}
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            </section>
+            `;
+
+            $$('[data-practice-cat]').forEach(el => {
+                const go = () => { location.hash = '#/practice/' + el.dataset.practiceCat; };
+                el.onclick = go;
+                el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+            });
+            return;
+        }
+
+        // Screen 2: Kategori dipilih tapi tidak punya kartu terbit
+        const rawPool = targetCategory ? byCatL(targetCategory[0]) : (singleTargetGesture ? [singleTargetGesture] : []);
+        if (rawPool.length === 0) {
+            app.innerHTML = `
+            <section class="page wrap" aria-label="Kategori belum tersedia">
+                <div class="lesson-top-bar">
+                    <a href="#/practice" class="lesson-back-btn"><span>←</span> PILIH KATEGORI LAIN</a>
+                    <div class="meta cy">${targetCategory ? targetCategory[1] : ''}</div>
+                </div>
+                <div style="text-align:center;padding:80px 20px">
+                    <h2 style="margin:20px 0 8px">Kategori Belum Bisa Dipilih</h2>
+                    <p style="color:var(--t2)">Kategori ini belum memiliki kartu gesture yang berstatus terbit. Materi segera hadir.</p>
+                    <a class="btn sm" href="#/practice" style="margin-top:24px;display:inline-block">← Pilih Kategori Lain</a>
+                </div>
+            </section>
+            `;
+            return;
+        }
+
+        // Pembentukan pool per kategori tanpa pencampuran
+        // Diacak tanpa pengulangan, panjang = min(10, pool.length)
+        let shuffled = [...rawPool];
+        if (singleTargetGesture) {
+            shuffled = [singleTargetGesture, ...rawPool.filter(g => g.id !== singleTargetGesture.id)];
+        } else {
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+        }
+
+        const sessionLength = Math.min(10, shuffled.length);
+        const sessionItems = shuffled.slice(0, sessionLength);
+        const categoryKey = targetCategory ? targetCategory[0] : (singleTargetGesture ? singleTargetGesture.c : null);
+        const categoryLabel = targetCategory ? targetCategory[1] : (CN[categoryKey] || 'PRACTICE');
 
         let currentIndex = 0;
         let sessionResults = [];
@@ -1529,9 +1433,9 @@
         let isRunning = false;
         let isSimulating = false;
         let sessionSaved = false;
-        let autoRun = false; // true = sesi berjalan, langkah berikutnya mulai otomatis
+        let autoRun = false;
 
-        // Spasi = mulai / jeda, supaya tidak perlu menekan tombol saat dua tangan dipakai.
+        // Spasi = mulai / jeda
         if (practiceKeyHandler) document.removeEventListener('keydown', practiceKeyHandler);
         practiceKeyHandler = (e) => {
             if (!$('#practice-viewport-container')) {
@@ -1550,10 +1454,15 @@
 
         app.innerHTML = `
         <section class="page wrap" aria-label="Real-time Gesture Practice">
-            <div class="page-header">
+            <div class="lesson-top-bar" style="margin-bottom:12px">
+                <a href="#/practice" class="lesson-back-btn"><span>←</span> GANTI KATEGORI</a>
+                <div class="meta cy">${categoryLabel} (${sessionLength} GESTURE)</div>
+            </div>
+
+            <div class="page-header" style="padding-top:10px">
                 <div class="meta">02 / PRACTICE</div>
-                <h1 class="big">PRACTICE</h1>
-                <p class="sub">Turn what you learned into real movement with real-time recognition.</p>
+                <h1 class="big">${categoryLabel}</h1>
+                <p class="sub">Latihan terfokus kategori ${categoryLabel}. Sesi kamera mandiri dengan pengenalan langsung.</p>
             </div>
 
             <div id="practice-viewport-container"></div>
@@ -1564,52 +1473,53 @@
             const container = $('#practice-viewport-container');
             if (!container) return;
 
-            // Timer langkah sebelumnya memegang target lama; hentikan sebelum DOM diganti.
             clearInterval(cameraTimer);
             cameraTimer = null;
             isRunning = false;
 
             // Session Complete Screen
-            if (currentIndex >= 10) {
+            if (currentIndex >= sessionLength) {
                 autoRun = false;
                 stopCamera();
                 const passedCount = sessionResults.filter(Boolean).length;
-                const accuracy = Math.round((passedCount / 10) * 100);
+                const accuracy = Math.round((passedCount / sessionLength) * 100);
                 const totalSeconds = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
                 if (!sessionSaved) {
                     sessionSaved = true;
-                    saveSession(passedCount, 10, totalSeconds);
+                    const sessionLevel = (sessionItems[0] && sessionItems[0].level) || 'kata';
+                    saveSession(passedCount, sessionLength, totalSeconds, sessionLevel);
                 }
 
                 container.innerHTML = `
                 <div class="session-complete-wrap">
-                    <div class="meta cy">PRACTICE SESSION COMPLETED</div>
-                    <h2 class="h2" style="margin: 16px 0 8px;">SESSION COMPLETE</h2>
+                    <div class="meta cy">SESI LATIHAN ${categoryLabel} SELESAI</div>
+                    <h2 class="h2" style="margin: 16px 0 8px;">SESI SELESAI</h2>
                     <p style="color: var(--t2); font-size: 16px;">Mode simulasi: pencocokan gerakan belum memakai model pengenalan sungguhan, jadi skor ini hanya latihan.</p>
 
                     <div class="session-stats-grid">
                         <div class="stat-cell">
-                            <b>${passedCount} / 10</b>
-                            <span class="meta">GESTURES PASSED</span>
+                            <b>${passedCount} / ${sessionLength}</b>
+                            <span class="meta">GESTURE BERHASIL</span>
                         </div>
                         <div class="stat-cell">
                             <b>${accuracy}%</b>
-                            <span class="meta">ACCURACY SCORE</span>
+                            <span class="meta">AKURASI</span>
                         </div>
                         <div class="stat-cell">
                             <b>${pad(Math.floor(totalSeconds / 60))}:${pad(totalSeconds % 60)}</b>
-                            <span class="meta">TOTAL SESSION TIME</span>
+                            <span class="meta">WAKTU SESI</span>
                         </div>
                     </div>
 
                     <div class="lesson-controls">
-                        <button class="btn p" id="btn-practice-again">PRACTICE AGAIN</button>
-                        <a class="btn" href="#/learn">VIEW PROGRESS</a>
+                        <button class="btn p" id="btn-practice-again">LATIHAN LAGI</button>
+                        <a class="btn" href="#/practice">PILIH KATEGORI LAIN</a>
+                        <a class="btn" href="#/learn">LIHAT PROGRES</a>
                     </div>
                 </div>
                 `;
 
-                $('#btn-practice-again').onclick = () => practice(targetId);
+                $('#btn-practice-again').onclick = () => practice(param);
                 return;
             }
 
@@ -1650,7 +1560,7 @@
 
                 <!-- TARGET SIGN INFORMATION -->
                 <div class="practice-target-card">
-                    <div class="meta cy">PRACTICE SESSION • STEP ${pad(currentIndex + 1)} / 10</div>
+                    <div class="meta cy">${categoryLabel} • STEP ${pad(currentIndex + 1)} / ${pad(sessionLength)}</div>
                     
                     <div style="margin-top: 24px;">
                         <span class="meta">CURRENT TARGET SIGN</span>
@@ -1669,16 +1579,16 @@
                     </p>
 
                     <div class="meta">SESSION PROGRESS</div>
-                    <div class="practice-session-dots" aria-label="Progress dots for 10 practice signs">
+                    <div class="practice-session-dots" aria-label="Progress dots for ${sessionLength} practice signs">
                         ${sessionItems.map((_, k) => `
                             <span class="session-dot ${k === currentIndex ? 'active' : ''} ${k < currentIndex ? (sessionResults[k] ? 'pass' : 'fail') : ''}"></span>
                         `).join('')}
                     </div>
 
                     <div class="practice-sim-selector">
-                        <span class="meta">QUICK TARGET SWITCH:</span>
+                        <span class="meta">GANTI SOAL DI KATEGORI INI:</span>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
-                            ${pool.slice(0, 5).map(g => `
+                            ${sessionItems.slice(0, 6).map(g => `
                                 <button class="btn sm" data-sign-id="${g.id}">${idw(g)}</button>
                             `).join('')}
                         </div>
@@ -1689,8 +1599,7 @@
 
             // Setup buttons & camera detection loop
             let isEvaluating = false;
-
-                        let holdCount = 0;
+            let holdCount = 0;
 
             const evaluateGesture = (forcePass = false) => {
                 if (!isRunning && !forcePass) return;
@@ -1720,7 +1629,7 @@
                     detectedWord.textContent = g.letter;
                     detectedConf.textContent = `${confidence}%`;
                     holdCount = (g.letter === targetLetter && g.conf >= 70) ? holdCount + 1 : 0;
-                    if (holdCount < 4) return; // 4 x 250 ms, tahan sekitar 1 detik
+                    if (holdCount < 4) return;
                     pass = true;
                 } else if (!forcePass && window.latestRealGesture) {
                     pass = (window.latestRealGesture.id === currentSign.id || window.latestRealGesture.w.includes(currentSign.w));
@@ -1762,7 +1671,6 @@
                 }
             };
 
-            // Hitung mundur besar di layar (tidak bergantung bunyi), lalu mulai menilai.
             let countdownToken = 0;
             const runCountdown = (seconds) => new Promise(resolve => {
                 const el = $('#cam-countdown');
@@ -1788,8 +1696,9 @@
 
             const beginListening = async (seconds) => {
                 autoRun = true;
+                if (!startTime) startTime = Date.now();
                 await Promise.all([loadLetterModel(), loadNumberModel()]);
-                if (!$('#camera-viewport')) return; // sudah pindah halaman
+                if (!$('#camera-viewport')) return;
                 if (!$('#camera-viewport video')) {
                     await initCamera($('#camera-viewport'));
                 }
@@ -1835,7 +1744,7 @@
 
             $$('[data-sign-id]').forEach(b => {
                 b.onclick = () => {
-                    const selected = pool.find(g => g.id === b.dataset.signId);
+                    const selected = sessionItems.find(g => g.id === b.dataset.signId);
                     if (selected) {
                         sessionItems[currentIndex] = selected;
                         renderPracticeStep();
@@ -1843,7 +1752,6 @@
                 };
             });
 
-            // Sesi sedang berjalan: langkah baru mulai sendiri (hitung mundur 2 detik).
             if (autoRun) beginListening(2);
         }
 
@@ -2255,8 +2163,8 @@
                         ['all', 'ALL'],
                         ['greet', 'GREETING'],
                         ['conv', 'CONVERSATION'],
-                        ['needs', 'NEEDS'],
-                        ['emerg', 'EMERGENCY'],
+                        ['days', 'DAYS'],
+                        ['verbs', 'VERBS'],
                         ['num', 'NUMBERS'],
                         ['alpha', 'ALPHABET']
                     ].map(f => `
@@ -2621,8 +2529,8 @@
     // Data contoh: hanya dipakai kalau server tidak bisa dihubungi. Bukan isi kamus yang sebenarnya.
     const FALLBACK_GESTURES = [
             { id: 'hello',     w: 'HELLO',     id_word: 'HALO',          c: 'greet', level: 'kata',    e: '👋', diff: 'Easy',   desc: 'Raise open hand near forehead and move outward.',      pos: 'Flat open hand, palm facing outward.',     mv: 'Smooth outward arc away from forehead.',        mis: 'Waving side-to-side casually.',        vkey: 'open_palm_wave' },
-            { id: 'thank-you', w: 'THANK YOU', id_word: 'TERIMA KASIH',  c: 'greet', level: 'kata',    e: '🙏', diff: 'Easy',   desc: 'Touch fingertips to chin, then move forward.',         pos: 'Flat hand facing inward at chin.',         mv: 'Forward and slightly down toward the person.',  mis: 'Starting too far from the chin.',      vkey: 'chin_forward' },
-            { id: 'goodbye',   w: 'GOODBYE',   id_word: 'SELAMAT TINGGAL', c: 'greet', level: 'kata', e: '🖐️', diff: 'Easy',   desc: 'Raise open hand and fold fingers into palm.',          pos: 'Open palm facing outward.',               mv: 'Controlled finger fold cadence.',               mis: 'Moving entire arm violently.',         vkey: 'farewell_fold' },
+            { id: 'thank-you', w: 'THANK YOU', id_word: 'TERIMA KASIH',  c: 'greet', level: 'kalimat', e: '🙏', diff: 'Easy',   desc: 'Touch fingertips to chin, then move forward.',         pos: 'Flat hand facing inward at chin.',         mv: 'Forward and slightly down toward the person.',  mis: 'Starting too far from the chin.',      vkey: 'chin_forward' },
+            { id: 'goodbye',   w: 'GOODBYE',   id_word: 'SELAMAT TINGGAL', c: 'greet', level: 'kalimat', e: '🖐️', diff: 'Easy',   desc: 'Raise open hand and fold fingers into palm.',          pos: 'Open palm facing outward.',               mv: 'Controlled finger fold cadence.',               mis: 'Moving entire arm violently.',         vkey: 'farewell_fold' },
             { id: 'please',    w: 'PLEASE',    id_word: 'TOLONG / SILAKAN', c: 'greet', level: 'kata', e: '🤲', diff: 'Easy', desc: 'Flat palm against center of chest, circular motion.',  pos: 'Flat palm on chest center.',              mv: 'Clockwise circular rubbing.',                   mis: 'Hovering in air without touching chest.', vkey: 'chest_circle' },
             { id: 'help',      w: 'HELP',      id_word: 'TOLONG',        c: 'greet', level: 'kata',    e: '🆘', diff: 'Easy',   desc: 'Thumbs-up fist on flat palm, lift upward.',            pos: 'Fist on flat horizontal palm.',           mv: 'Firm supportive upward lift.',                  mis: 'Leaving supporting palm behind.',      vkey: 'palm_fist_lift' },
             { id: 'how-are-you', w: 'HOW ARE YOU', id_word: 'APA KABAR', c: 'conv', level: 'kalimat', e: '💬', diff: 'Medium', desc: 'Roll curved hands open, then point forward.',          pos: 'Both hands curved, roll open.',           mv: 'Roll open and point to person.',                mis: 'Omitting pointing at the end.',        vkey: 'how_roll_point' },

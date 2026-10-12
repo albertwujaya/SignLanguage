@@ -5,38 +5,15 @@ namespace App\Http\Requests\Admin;
 use App\Models\Gesture;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class GestureRequest extends FormRequest
 {
-    public const CATEGORIES = ['greet', 'conv', 'days', 'verbs', 'num', 'alpha'];
+    public const CATEGORIES = Gesture::CATEGORIES;
 
-    /**
-     * Label manusiawi untuk setiap kategori (ditampilkan di panel admin).
-     *
-     * @var array<string, string>
-     */
-    public const CATEGORY_LABELS = [
-        'greet' => 'Basic Greetings',
-        'conv'  => 'Daily Conversation',
-        'days'  => 'Days of the Week',
-        'verbs' => 'Verbs',
-        'num'   => 'Numbers',
-        'alpha' => 'Alphabet',
-    ];
+    public const CATEGORY_LABELS = Gesture::CATEGORY_LABELS;
 
-    /**
-     * Kategori yang valid per jenjang.
-     * Dipakai untuk validasi kombinasi level–category dan untuk membatasi
-     * dropdown kategori di panel admin per jenis (Tahap 4).
-     *
-     * @var array<string, string[]>
-     */
-    public const LEVEL_CATEGORIES = [
-        'abjad'   => ['alpha'],
-        'angka'   => ['num'],
-        'kata'    => ['greet', 'conv', 'days', 'verbs'],
-        'kalimat' => ['greet', 'conv'],
-    ];
+    public const LEVEL_CATEGORIES = Gesture::LEVEL_CATEGORIES;
 
     public const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
@@ -80,16 +57,16 @@ class GestureRequest extends FormRequest
     /**
      * Validasi tambahan: pastikan kombinasi level–category valid.
      */
-    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    public function withValidator(Validator $validator): void
     {
-        $validator->after(function (\Illuminate\Validation\Validator $v): void {
-            $level    = $this->input('level');
+        $validator->after(function (Validator $v): void {
+            $level = $this->input('level');
             $category = $this->input('category');
 
             if ($level && $category && isset(self::LEVEL_CATEGORIES[$level])) {
                 $allowed = self::LEVEL_CATEGORIES[$level];
                 if (! in_array($category, $allowed, true)) {
-                    $levelLabel    = Gesture::LEVELS[$level] ?? $level;
+                    $levelLabel = Gesture::LEVELS[$level] ?? $level;
                     $allowedLabels = implode(', ', array_map(
                         fn (string $c) => self::CATEGORY_LABELS[$c] ?? $c,
                         $allowed
@@ -110,7 +87,7 @@ class GestureRequest extends FormRequest
     {
         return [
             'category.required' => 'Kategori wajib dipilih.',
-            'level.required'    => 'Jenjang wajib dipilih.',
+            'level.required' => 'Jenjang wajib dipilih.',
         ];
     }
 }

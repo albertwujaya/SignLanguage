@@ -128,6 +128,13 @@ a {
     color: var(--ink);
 }
 
+.brand-logo {
+    width: 28px;
+    height: 34px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
 .brand-symbol {
     width: 36px;
     height: 36px;
@@ -582,11 +589,16 @@ h3 {
 }
 
 .row-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
+    text-align: center !important;
     white-space: nowrap;
+}
+
+.row-actions > * {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+    vertical-align: middle;
 }
 
 /* ==========================================================================
@@ -720,13 +732,19 @@ td strong {
 }
 
 .category-label {
-    display: inline-block;
-    padding: 2px 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
     border-radius: var(--radius-pill);
     background: var(--bg-surface-dim);
     color: var(--t2);
     font-size: 12px;
     font-weight: 700;
+    white-space: nowrap;
+    text-align: center;
+    margin: 0 auto;
+    letter-spacing: 0.02em;
 }
 
 /* Badges with guaranteed contrast */
@@ -765,8 +783,9 @@ td strong {
     border: 1px solid #F7BFB8;
 }
 
+th.actions-heading,
 .actions-heading {
-    text-align: right;
+    text-align: center !important;
 }
 
 .empty-state {

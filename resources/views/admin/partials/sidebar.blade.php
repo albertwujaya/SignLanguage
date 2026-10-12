@@ -1,10 +1,10 @@
 <aside id="adminSidebar" class="admin-sidebar" aria-label="Menu Navigasi Admin">
     <div class="sidebar-brand">
         <a class="brand-link" href="{{ route('admin.dashboard') }}">
-            <span class="brand-symbol">◇</span>
-            <span class="brand-text">
-                SIGN LANGUAGE
-                <small class="brand-badge">STUDIO</small>
+            <img class="brand-logo" src="{{ asset('images/logo.svg') }}" alt="" width="28" height="34" style="display:inline-block;vertical-align:middle;flex-shrink:0">
+            <span class="brand-text" style="display:inline-flex;align-items:center;gap:6px">
+                <span style="font-weight:700;letter-spacing:0.02em">Signesia</span>
+                <small class="brand-badge" style="display:inline-block">STUDIO</small>
             </span>
         </a>
         <button id="sidebarCloseBtn" class="sidebar-close-btn" type="button" aria-label="Tutup menu navigasi">
@@ -25,10 +25,57 @@
         {{-- Grup 2: Konten & Kamus --}}
         <div class="nav-group">
             <span class="nav-group-title">Konten &amp; Kamus</span>
-            <a href="{{ route('admin.gestures.index') }}" @class(['nav-link', 'active' => request()->routeIs('admin.gestures.index', 'admin.gestures.create', 'admin.gestures.edit', 'admin.gestures.preview')]) @if(request()->routeIs('admin.gestures.index', 'admin.gestures.create', 'admin.gestures.edit', 'admin.gestures.preview')) aria-current="page" @endif>
+            
+            @php
+                $isAllGestures = request()->routeIs('admin.gestures.index') && !request()->filled('level');
+                $isKata = request()->routeIs('admin.gestures.*') && request('level') === 'kata';
+                $isKalimat = request()->routeIs('admin.gestures.*') && request('level') === 'kalimat';
+                $isAngka = request()->routeIs('admin.gestures.*') && request('level') === 'angka';
+                $isAbjad = request()->routeIs('admin.gestures.*') && request('level') === 'abjad';
+
+                // Helper counts
+                $cntKataPub = \App\Models\Gesture::where('level', 'kata')->published()->count();
+                $cntKataDraft = \App\Models\Gesture::where('level', 'kata')->where('status', 'draft')->count();
+
+                $cntKalimatPub = \App\Models\Gesture::where('level', 'kalimat')->published()->count();
+                $cntKalimatDraft = \App\Models\Gesture::where('level', 'kalimat')->where('status', 'draft')->count();
+
+                $cntAngkaPub = \App\Models\Gesture::where('level', 'angka')->published()->count();
+                $cntAngkaDraft = \App\Models\Gesture::where('level', 'angka')->where('status', 'draft')->count();
+
+                $cntAbjadPub = \App\Models\Gesture::where('level', 'abjad')->published()->count();
+                $cntAbjadDraft = \App\Models\Gesture::where('level', 'abjad')->where('status', 'draft')->count();
+            @endphp
+
+            <a href="{{ route('admin.gestures.index', ['level' => 'kata']) }}" @class(['nav-link', 'active' => $isKata]) @if($isKata) aria-current="page" @endif>
                 <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                <span>Daftar Gesture</span>
+                <span>Kata</span>
+                <span class="sidebar-count" style="margin-left:auto;font-size:11px;opacity:0.75">{{ $cntKataPub }} / {{ $cntKataDraft }}d</span>
             </a>
+
+            <a href="{{ route('admin.gestures.index', ['level' => 'kalimat']) }}" @class(['nav-link', 'active' => $isKalimat]) @if($isKalimat) aria-current="page" @endif>
+                <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Kalimat</span>
+                <span class="sidebar-count" style="margin-left:auto;font-size:11px;opacity:0.75">{{ $cntKalimatPub }} / {{ $cntKalimatDraft }}d</span>
+            </a>
+
+            <a href="{{ route('admin.gestures.index', ['level' => 'angka']) }}" @class(['nav-link', 'active' => $isAngka]) @if($isAngka) aria-current="page" @endif>
+                <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M12 8v8"></path><path d="M10 10l2-2"></path></svg>
+                <span>Angka</span>
+                <span class="sidebar-count" style="margin-left:auto;font-size:11px;opacity:0.75">{{ $cntAngkaPub }} / {{ $cntAngkaDraft }}d</span>
+            </a>
+
+            <a href="{{ route('admin.gestures.index', ['level' => 'abjad']) }}" @class(['nav-link', 'active' => $isAbjad]) @if($isAbjad) aria-current="page" @endif>
+                <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l2-6h4l2 6h4"></path><path d="M12 4l-4 10h8z"></path></svg>
+                <span>Alfabet</span>
+                <span class="sidebar-count" style="margin-left:auto;font-size:11px;opacity:0.75">{{ $cntAbjadPub }} / {{ $cntAbjadDraft }}d</span>
+            </a>
+
+            <a href="{{ route('admin.gestures.index') }}" @class(['nav-link', 'active' => $isAllGestures]) @if($isAllGestures) aria-current="page" @endif>
+                <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                <span>Semua</span>
+            </a>
+
             <a href="{{ route('admin.gestures.completeness') }}" @class(['nav-link', 'active' => request()->routeIs('admin.gestures.completeness')]) @if(request()->routeIs('admin.gestures.completeness')) aria-current="page" @endif>
                 <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                 <span>Kelengkapan Media</span>
@@ -45,9 +92,21 @@
         <div class="nav-group">
             <span class="nav-group-title">Pengguna &amp; Progres</span>
             @if (auth()->user()->isAdmin())
-                <a href="{{ route('admin.users.index') }}" @class(['nav-link', 'active' => request()->routeIs('admin.users.*')]) @if(request()->routeIs('admin.users.*')) aria-current="page" @endif>
+                @php
+                    $isStaffTab = request()->routeIs('admin.users.*') && request('tab') === 'staff';
+                    $isStudentsTab = request()->routeIs('admin.users.*') && request('tab') !== 'staff';
+                    $totalStaff = \App\Models\User::whereIn('role', ['admin', 'editor'])->count();
+                    $totalStudents = \App\Models\User::where('role', 'student')->count();
+                @endphp
+                <a href="{{ route('admin.users.index', ['tab' => 'staff']) }}" @class(['nav-link', 'active' => $isStaffTab]) @if($isStaffTab) aria-current="page" @endif>
+                    <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span>Tim Pengelola</span>
+                    <span class="sidebar-count" style="margin-left:auto;font-size:11px;opacity:0.75">{{ $totalStaff }}</span>
+                </a>
+                <a href="{{ route('admin.users.index') }}" @class(['nav-link', 'active' => $isStudentsTab]) @if($isStudentsTab) aria-current="page" @endif>
                     <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    <span>Data Pengguna</span>
+                    <span>Progres Siswa</span>
+                    <span class="sidebar-count" style="margin-left:auto;font-size:11px;opacity:0.75">{{ $totalStudents }}</span>
                 </a>
             @endif
             <a href="{{ route('admin.gestures.analytics') }}" @class(['nav-link', 'active' => request()->routeIs('admin.gestures.analytics')]) @if(request()->routeIs('admin.gestures.analytics')) aria-current="page" @endif>

@@ -15,6 +15,7 @@ class AdminSeeder extends Seeder
         // Selaras dengan aturan /setup: password admin minimal 12 karakter
         if (! $email || ! $password || strlen($password) < 12) {
             $this->command?->error('Isi ADMIN_EMAIL dan ADMIN_PASSWORD (min. 12 karakter) di .env, lalu jalankan lagi.');
+
             return;
         }
 

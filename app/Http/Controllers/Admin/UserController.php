@@ -38,7 +38,19 @@ class UserController extends Controller
             });
         }
 
-        // Filter role
+        // Filter tab (staff vs students)
+        $tab = $request->get('tab');
+        if ($tab === 'staff') {
+            $query->whereIn('role', ['admin', 'editor']);
+        } elseif (! $request->filled('role')) {
+            $query->where(function ($sub): void {
+                $sub->where('role', 'student')
+                    ->orWhereNull('role')
+                    ->orWhereNotIn('role', ['admin', 'editor']);
+            });
+        }
+
+        // Filter role spesifik jika dipilih
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
@@ -75,6 +87,10 @@ class UserController extends Controller
             'users' => $users,
             'totalPublished' => $totalPublished,
             'adminCount' => User::query()->where('role', 'admin')->count(),
+            'editorCount' => User::query()->where('role', 'editor')->count(),
+            'userCount' => User::query()->whereNotIn('role', ['admin', 'editor'])->count(),
+            'staffMembers' => User::query()->whereIn('role', ['admin', 'editor'])->orderByRaw("CASE WHEN role = 'admin' THEN 1 ELSE 2 END")->orderBy('name')->get(),
+            'currentTab' => $tab ?? 'students',
         ]);
     }
 

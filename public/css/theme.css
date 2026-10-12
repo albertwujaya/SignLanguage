@@ -65,7 +65,7 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 .kbd-hint { box-shadow: none; padding: 0 6px; }
 .header-status-pill { color: var(--ink); }
 .live-dot { background: var(--sage); box-shadow: 0 0 0 2px var(--ink); }
-.level-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin: 18px 0 8px; }
+.level-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0 32px; }
 .level-tab { padding: 8px 18px; cursor: pointer; font-size: 14px; }
 
 /* ---- Kartu = kertas tempel ---- */
@@ -279,7 +279,7 @@ nav.top a::after { display: none; }
     .feat-visual-overlay { padding: 12px; }
 
     /* Belajar */
-    .level-tabs { gap: 8px; margin: 12px 0 20px; } /* ruang bawah supaya baris tab yang membungkus tidak menempel ke kartu */
+    .level-tabs { gap: 8px; margin: 14px 0 24px; } /* ruang bawah supaya baris tab yang membungkus tidak menempel ke kartu */
     .level-tab { padding: 7px 14px; font-size: 12px; }
     .cat-row { padding: 18px 16px; gap: 14px; }
     .cat-row:hover { padding-left: 16px; }

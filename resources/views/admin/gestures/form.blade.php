@@ -41,22 +41,35 @@
                     <option value="draft" @selected(old('status', $gesture->status) === 'draft')>Draft (Disembunyikan dari pengguna)</option>
                 </select>
             </div>
+            @php
+                $currentLevelVal = old('level', $fixedLevel ?? $gesture->level ?? 'kata');
+                $isAutoCategory = in_array($currentLevelVal, ['abjad', 'angka']);
+                $autoCategoryVal = $currentLevelVal === 'abjad' ? 'alpha' : ($currentLevelVal === 'angka' ? 'num' : null);
+            @endphp
+
             <div class="field">
-                <label for="category">Kategori</label>
-                <select id="category" name="category" required>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category }}" @selected(old('category', $gesture->category) === $category)>{{ $category }}</option>
-                    @endforeach
-                </select>
+                <label>Jenjang belajar</label>
+                <div style="padding:10px 14px;background:var(--cream,#f6efdd);border:1px solid var(--line);border-radius:6px;font-weight:700;color:var(--dark,#163336)">
+                    {{ $levels[$currentLevelVal] ?? ucfirst($currentLevelVal) }}
+                </div>
+                <input type="hidden" name="level" value="{{ $currentLevelVal }}">
+                <small>Jenjang ditentukan otomatis berdasarkan menu tempat gesture dibuat.</small>
             </div>
-            <div class="field">
-                <label for="level">Jenjang belajar</label>
-                <select id="level" name="level" required>
-                    @foreach ($levels as $key => $label)
-                        <option value="{{ $key }}" @selected(old('level', $gesture->level ?: 'kata') === $key)>{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
+
+            @if ($isAutoCategory)
+                <input type="hidden" name="category" value="{{ old('category', $autoCategoryVal) }}">
+            @else
+                <div class="field">
+                    <label for="category">Kategori</label>
+                    <select id="category" name="category" required>
+                        @foreach ($categories as $catKey)
+                            <option value="{{ $catKey }}" @selected(old('category', $gesture->category) === $catKey)>
+                                {{ $categoryLabels[$catKey] ?? $catKey }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
             <div class="field">
                 <label for="sort_order">Urutan dalam jenjang</label>
                 <input id="sort_order" type="number" min="0" name="sort_order" value="{{ old('sort_order', $gesture->sort_order ?? 0) }}">

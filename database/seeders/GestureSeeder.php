@@ -185,32 +185,32 @@ class GestureSeeder extends Seeder
 
             // VERBS / KATA KERJA (03)
             [
-                'slug'       => 'eat',
-                'word'       => 'EAT',
+                'slug' => 'eat',
+                'word' => 'EAT',
                 'indonesian' => 'MAKAN',
-                'category'   => 'verbs',
-                'emoji'      => '🍽️',
+                'category' => 'verbs',
+                'emoji' => '🍽️',
                 'difficulty' => 'Easy',
                 'description' => 'Satukan semua ujung jari hingga menyentuh ibu jari (bentuk O yang dipipihkan), lalu ketukkan ke arah bibir dua kali.',
                 'hand_position' => 'Bentuk O yang pipih, ujung-ujung jari berkumpul.',
-                'movement'      => 'Gerakan mengetuk pelan yang berulang ke arah mulut.',
+                'movement' => 'Gerakan mengetuk pelan yang berulang ke arah mulut.',
                 'common_mistake' => 'Membuka tangan menjadi telapak lebar saat mengetuk.',
-                'visual_key'    => 'cluster_mouth_tap',
-                'sort_order'    => 1,
+                'visual_key' => 'cluster_mouth_tap',
+                'sort_order' => 1,
             ],
             [
-                'slug'       => 'sleep',
-                'word'       => 'SLEEP',
+                'slug' => 'sleep',
+                'word' => 'SLEEP',
                 'indonesian' => 'TIDUR',
-                'category'   => 'verbs',
-                'emoji'      => '😴',
+                'category' => 'verbs',
+                'emoji' => '😴',
                 'difficulty' => 'Easy',
                 'description' => 'Angkat tangan terbuka di depan wajah, tarik ke bawah sambil merapatkan jari-jari hingga menyentuh ibu jari, dan miringkan kepala sedikit.',
                 'hand_position' => 'Telapak terbuka setinggi mata, lalu mengatup menjadi jepitan saat turun ke dagu.',
-                'movement'      => 'Tarikan ke bawah sambil menutup, diikuti mata yang menurun dengan santai.',
+                'movement' => 'Tarikan ke bawah sambil menutup, diikuti mata yang menurun dengan santai.',
                 'common_mistake' => 'Menurunkan tangan tanpa merapatkan jari-jari.',
-                'visual_key'    => 'face_descend_close',
-                'sort_order'    => 3,
+                'visual_key' => 'face_descend_close',
+                'sort_order' => 3,
             ],
 
             // BASIC GREETINGS — tambahan: help (dipindah dari emerg via migration)
@@ -329,7 +329,7 @@ class GestureSeeder extends Seeder
             $row['level'] ??= match (true) {
                 $row['category'] === 'alpha' => 'abjad',
                 $row['category'] === 'num' => 'angka',
-                $row['slug'] === 'how-are-you' => 'kalimat',
+                in_array($row['slug'], ['how-are-you', 'nice-to-meet-you', 'goodbye', 'welcome', 'thank-you'], true) => 'kalimat',
                 default => 'kata',
             };
 

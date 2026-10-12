@@ -1,17 +1,24 @@
 @extends('admin.layout')
 
-@section('title', 'Data Gesture')
+@section('title', $currentLevel && isset($levels[$currentLevel]) ? 'Data ' . $levels[$currentLevel] : 'Data Gesture')
 
 @section('content')
     <div class="page-heading">
         <div>
-            <p class="eyebrow">KAMUS / DATA</p>
-            <h1>Data Gesture</h1>
-            <p class="page-lede">{{ $gestures->total() }} kosakata ditampilkan · {{ $publishedCount }} terbit · {{ $draftCount }} draft</p>
+            <p class="eyebrow">KAMUS / {{ $currentLevel && isset($levels[$currentLevel]) ? strtoupper($levels[$currentLevel]) : 'SEMUA DATA' }}</p>
+            <h1>{{ $currentLevel && isset($levels[$currentLevel]) ? 'Data ' . $levels[$currentLevel] : 'Data Gesture' }}</h1>
+            <p class="page-lede">
+                {{ $gestures->total() }} kosakata ditampilkan
+                @if ($currentLevel && isset($countsByLevel[$currentLevel]))
+                    · {{ $countsByLevel[$currentLevel]['published'] }} terbit · {{ $countsByLevel[$currentLevel]['draft'] }} draft
+                @else
+                    · {{ $publishedCount }} terbit · {{ $draftCount }} draft
+                @endif
+            </p>
         </div>
         <div class="toolbar-group">
-            <a class="button button-primary" href="{{ route('admin.gestures.create') }}">
-                <span aria-hidden="true">+</span> Tambah Gesture
+            <a class="button button-primary" href="{{ route('admin.gestures.create', array_filter(['level' => $currentLevel])) }}">
+                <span aria-hidden="true">+</span> Tambah {{ $currentLevel && isset($levels[$currentLevel]) ? $levels[$currentLevel] : 'Gesture' }}
             </a>
         </div>
     </div>
@@ -22,12 +29,16 @@
             <label class="sr-only" for="q">Cari gesture</label>
             <input id="q" type="search" name="q" value="{{ request('q') }}" placeholder="Cari kata, arti, atau slug..." style="max-width:260px">
             
-            <select name="level" aria-label="Filter jenjang" style="max-width:150px">
-                <option value="">Semua Jenjang</option>
-                @foreach ($levels as $key => $label)
-                    <option value="{{ $key }}" @selected(request('level') === $key)>{{ $label }}</option>
-                @endforeach
-            </select>
+            @if ($currentLevel)
+                <input type="hidden" name="level" value="{{ $currentLevel }}">
+            @else
+                <select name="level" aria-label="Filter jenjang" style="max-width:150px">
+                    <option value="">Semua Jenjang</option>
+                    @foreach ($levels as $key => $label)
+                        <option value="{{ $key }}" @selected(request('level') === $key)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            @endif
 
             <select name="status" aria-label="Filter status" style="max-width:140px">
                 <option value="">Semua Status</option>
@@ -37,8 +48,8 @@
         </div>
         <div class="toolbar-group">
             <button class="button button-primary button-sm" type="submit">Terapkan</button>
-            @if (request()->hasAny(['q', 'level', 'status']))
-                <a class="button button-quiet button-sm" href="{{ route('admin.gestures.index') }}">Reset</a>
+            @if (request()->hasAny(['q', 'status']) || (! $currentLevel && request()->has('level')))
+                <a class="button button-quiet button-sm" href="{{ route('admin.gestures.index', array_filter(['level' => $currentLevel])) }}">Reset</a>
             @endif
         </div>
     </form>
@@ -51,7 +62,7 @@
                     <th>Terjemahan</th>
                     <th>Status</th>
                     <th>Jenjang</th>
-                    <th>Kategori</th>
+                    <th style="text-align:center;padding:0 16px;white-space:nowrap">Kategori</th>
                     <th>Media</th>
                     <th>Kesulitan</th>
                     <th class="actions-heading">Aksi</th>
@@ -73,7 +84,7 @@
                             @endif
                         </td>
                         <td>{{ $levels[$gesture->level] ?? $gesture->level }}</td>
-                        <td><span class="category-label">{{ $gesture->category }}</span></td>
+                        <td style="text-align:center;padding:10px 16px;white-space:nowrap"><span class="category-label">{{ $categoryLabels[$gesture->category] ?? $gesture->category }}</span></td>
                         <td>
                             {{ $gesture->image_path ? 'Gambar' : '' }}
                             {{ $gesture->image_path && $gesture->video_path ? ' + ' : '' }}

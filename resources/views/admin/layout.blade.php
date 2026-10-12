@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#F6EFDD">
-    <title>@yield('title') | Sign Language Admin</title>
+    <title>@yield('title') | Signesia Admin</title>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
+    <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
     <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>

@@ -43,6 +43,24 @@ class Gesture extends Model
         'kalimat' => 'Kalimat',
     ];
 
+    public const CATEGORIES = ['greet', 'conv', 'days', 'verbs', 'num', 'alpha'];
+
+    public const CATEGORY_LABELS = [
+        'greet' => 'Basic Greetings',
+        'conv' => 'Daily Conversation',
+        'days' => 'Days of the Week',
+        'verbs' => 'Verbs',
+        'num' => 'Numbers',
+        'alpha' => 'Alphabet',
+    ];
+
+    public const LEVEL_CATEGORIES = [
+        'abjad' => ['alpha'],
+        'angka' => ['num'],
+        'kata' => ['greet', 'conv', 'days', 'verbs'],
+        'kalimat' => ['greet', 'conv'],
+    ];
+
     public function progress(): HasMany
     {
         return $this->hasMany(GestureProgress::class);

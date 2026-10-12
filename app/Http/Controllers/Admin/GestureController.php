@@ -32,23 +32,50 @@ class GestureController extends Controller
             ->orderBy('sort_order')
             ->orderBy('word');
 
+        $countsByLevel = [];
+        foreach (Gesture::LEVELS as $lvlKey => $lvlLabel) {
+            $countsByLevel[$lvlKey] = [
+                'published' => Gesture::where('level', $lvlKey)->published()->count(),
+                'draft' => Gesture::where('level', $lvlKey)->where('status', Gesture::STATUS_DRAFT)->count(),
+                'total' => Gesture::where('level', $lvlKey)->count(),
+            ];
+        }
+
         return view('admin.gestures.index', [
             'gestures' => $query->paginate(15)->withQueryString(),
             'levels' => Gesture::LEVELS,
+            'currentLevel' => $request->level,
+            'countsByLevel' => $countsByLevel,
             'totalCount' => Gesture::count(),
             'publishedCount' => Gesture::published()->count(),
             'draftCount' => Gesture::where('status', Gesture::STATUS_DRAFT)->count(),
             'trashedCount' => Gesture::onlyTrashed()->count(),
+            'categoryLabels' => Gesture::CATEGORY_LABELS,
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $level = $request->query('level', 'kata');
+        if (! array_key_exists($level, Gesture::LEVELS)) {
+            $level = 'kata';
+        }
+
+        $allowedCategories = Gesture::LEVEL_CATEGORIES[$level] ?? Gesture::CATEGORIES;
+        $defaultCategory = $allowedCategories[0] ?? 'greet';
+
         return view('admin.gestures.form', [
-            'gesture' => new Gesture(['status' => Gesture::STATUS_PUBLISHED]),
-            'categories' => GestureRequest::CATEGORIES,
+            'gesture' => new Gesture([
+                'status' => Gesture::STATUS_PUBLISHED,
+                'level' => $level,
+                'category' => $defaultCategory,
+            ]),
+            'categories' => $allowedCategories,
+            'categoryLabels' => Gesture::CATEGORY_LABELS,
             'difficulties' => GestureRequest::DIFFICULTIES,
             'levels' => Gesture::LEVELS,
+            'fixedLevel' => $level,
+            'levelCategories' => Gesture::LEVEL_CATEGORIES,
         ]);
     }
 
@@ -66,11 +93,17 @@ class GestureController extends Controller
 
     public function edit(Gesture $gesture): View
     {
+        $level = $gesture->level ?: 'kata';
+        $allowedCategories = Gesture::LEVEL_CATEGORIES[$level] ?? Gesture::CATEGORIES;
+
         return view('admin.gestures.form', [
             'gesture' => $gesture,
-            'categories' => GestureRequest::CATEGORIES,
+            'categories' => $allowedCategories,
+            'categoryLabels' => Gesture::CATEGORY_LABELS,
             'difficulties' => GestureRequest::DIFFICULTIES,
             'levels' => Gesture::LEVELS,
+            'fixedLevel' => $level,
+            'levelCategories' => Gesture::LEVEL_CATEGORIES,
         ]);
     }
 
