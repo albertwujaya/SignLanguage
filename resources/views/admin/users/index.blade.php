@@ -30,114 +30,16 @@
     {{-- Tabs Pemisah: Siswa vs Tim Pengelola --}}
     <div style="display:flex;gap:10px;border-bottom:2px solid var(--line);margin-bottom:24px" role="tablist">
         <a href="{{ route('admin.users.index') }}" 
-           style="padding:10px 18px;font-family:var(--font-heading);font-weight:700;font-size:14px;text-decoration:none;border-bottom:3px solid {{ !$isStaff ? 'var(--mustard,#F2B45A)' : 'transparent' }};color:{{ !$isStaff ? 'var(--ink,#2B2118)' : 'var(--t3)' }};margin-bottom:-2px">
-            👥 Progres Siswa ({{ $userCount }})
+           style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-family:var(--font-heading);font-weight:700;font-size:14px;text-decoration:none;border-bottom:3px solid {{ !$isStaff ? 'var(--mustard,#F2B45A)' : 'transparent' }};color:{{ !$isStaff ? 'var(--ink,#2B2118)' : 'var(--t3)' }};margin-bottom:-2px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Progres Siswa ({{ $userCount }})
         </a>
         <a href="{{ route('admin.users.index', ['tab' => 'staff']) }}" 
-           style="padding:10px 18px;font-family:var(--font-heading);font-weight:700;font-size:14px;text-decoration:none;border-bottom:3px solid {{ $isStaff ? 'var(--mustard,#F2B45A)' : 'transparent' }};color:{{ $isStaff ? 'var(--ink,#2B2118)' : 'var(--t3)' }};margin-bottom:-2px">
-            🛡️ Tim Pengelola &amp; Staf ({{ $adminCount + $editorCount }})
+           style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;font-family:var(--font-heading);font-weight:700;font-size:14px;text-decoration:none;border-bottom:3px solid {{ $isStaff ? 'var(--mustard,#F2B45A)' : 'transparent' }};color:{{ $isStaff ? 'var(--ink,#2B2118)' : 'var(--t3)' }};margin-bottom:-2px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Tim Pengelola &amp; Staf ({{ $adminCount + $editorCount }})
         </a>
     </div>
-
-    {{-- Bagian Tim Pengelola: Info Akun Admin & Form Tambah Editor (HANYA tampil di tab staff) --}}
-    @if ($isStaff)
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;margin-bottom:24px">
-            {{-- Panel 1: Info Akun Admin & Staf Aktif --}}
-            <section style="background:var(--white);padding:20px;border:1px solid var(--line);border-radius:8px">
-                <div class="section-heading" style="margin-bottom:14px">
-                    <div>
-                        <p class="eyebrow">INFO TIM PENGELOLA</p>
-                        <h2 style="margin:4px 0 6px;font-size:18px">Daftar Akun Admin &amp; Staf</h2>
-                    </div>
-                    <p style="color:var(--muted);font-size:13px;margin:0">
-                        Total <strong>{{ $adminCount }}</strong> Admin dan <strong>{{ $editorCount }}</strong> Editor aktif.
-                    </p>
-                </div>
-
-                <div style="display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;padding-right:4px">
-                    @forelse ($staffMembers as $staff)
-                        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg-surface,#FAFAF7);border:1px solid var(--line);border-radius:6px;gap:10px">
-                            <div style="display:flex;align-items:center;gap:10px;min-width:0">
-                                <div style="width:34px;height:34px;border-radius:50%;background:var(--mustard,#F2B45A);color:var(--ink,#2B2118);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0" aria-hidden="true">
-                                    {{ strtoupper(substr($staff->name, 0, 1)) }}
-                                </div>
-                                <div style="min-width:0;overflow:hidden">
-                                    <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                                        {{ $staff->name }}
-                                        @if ($staff->is(auth()->user()))
-                                            <span style="font-size:11px;font-weight:600;color:var(--forest,#2F7A59)">(Anda)</span>
-                                        @endif
-                                    </div>
-                                    <div style="font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ $staff->email }}</div>
-                                </div>
-                            </div>
-                            <div style="flex-shrink:0;text-align:right">
-                                @if ($staff->role === 'admin')
-                                    <span class="badge badge-warning" style="font-size:11px">ADMIN</span>
-                                @else
-                                    <span class="badge badge-draft" style="font-size:11px">EDITOR</span>
-                                @endif
-                                <div style="font-size:11px;color:var(--t3);margin-top:2px">
-                                    {{ $staff->last_active_at ? $staff->last_active_at->diffForHumans() : 'Belum aktif' }}
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <p style="color:var(--t3);font-size:13px">Belum ada akun pengelola.</p>
-                    @endforelse
-                </div>
-            </section>
-
-            {{-- Panel 2: Tambah Editor / Staf Baru --}}
-            <section class="account-create" style="background:var(--white);padding:20px;border:1px solid var(--line);border-radius:8px" aria-labelledby="create-account-title">
-                <div class="section-heading" style="margin-bottom:14px">
-                    <div>
-                        <p class="eyebrow">AKUN PENGELOLA BARU</p>
-                        <h2 id="create-account-title" style="margin:4px 0 6px;font-size:18px">Tambah Editor / Staf</h2>
-                    </div>
-                    <p style="color:var(--muted);font-size:13px;margin:0">
-                        Akun baru otomatis mendapat hak akses editor mengelola gesture.
-                    </p>
-                </div>
-
-                @if ($errors->any())
-                    <div class="flash flash-error" style="margin-bottom:14px;padding:10px 12px;background:#fef2f2;border:1px solid #f87171;border-radius:6px;color:#991b1b" role="alert">
-                        <strong>Gagal membuat akun:</strong>
-                        <ul style="margin:4px 0 0 16px;padding:0;font-size:13px">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
-                <form class="account-form" method="POST" action="{{ route('admin.users.store') }}">
-                    @csrf
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-                        <div class="field" style="margin:0">
-                            <label for="name" style="font-size:13px">Nama</label>
-                            <input id="name" name="name" value="{{ old('name') }}" autocomplete="name" required style="width:100%">
-                        </div>
-                        <div class="field" style="margin:0">
-                            <label for="email" style="font-size:13px">Email</label>
-                            <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required style="width:100%">
-                        </div>
-                        <div class="field" style="margin:0">
-                            <label for="password" style="font-size:13px">Kata sandi awal (min 12)</label>
-                            <input id="password" type="password" name="password" autocomplete="new-password" minlength="12" required style="width:100%">
-                        </div>
-                        <div class="field" style="margin:0">
-                            <label for="password_confirmation" style="font-size:13px">Ulangi kata sandi</label>
-                            <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" minlength="12" required style="width:100%">
-                        </div>
-                    </div>
-                    <div class="form-actions" style="margin-top:14px">
-                        <button class="button button-primary" type="submit">Buat akun editor</button>
-                    </div>
-                </form>
-            </section>
-        </div>
-    @endif
 
     {{-- Filter & Search Toolbar --}}
     <form method="GET" action="{{ route('admin.users.index') }}" class="toolbar-bar" style="background:var(--white);padding:14px 16px;border:1px solid var(--line);border-radius:6px;margin-bottom:20px">
@@ -267,4 +169,60 @@
         </table>
     </div>
     <div class="pagination">{{ $users->links() }}</div>
+
+    {{-- Bagian Tim Pengelola: Form Tambah Editor (Tampil di bawah tabel pada tab staff) --}}
+    @if ($isStaff)
+        <div style="margin-top:32px">
+            {{-- Panel Tambah Editor / Staf Baru --}}
+            <section class="account-create" style="background:var(--white);padding:24px;border:1px solid var(--line);border-radius:8px" aria-labelledby="create-account-title">
+                <div class="section-heading" style="margin-bottom:16px">
+                    <div>
+                        <p class="eyebrow">AKUN PENGELOLA BARU</p>
+                        <h2 id="create-account-title" style="margin:4px 0 6px;font-size:18px">Tambah Editor / Staf</h2>
+                    </div>
+                    <p style="color:var(--muted);font-size:13px;margin:0">
+                        Akun baru otomatis mendapat hak akses editor mengelola gesture.
+                    </p>
+                </div>
+
+                @if ($errors->any())
+                    <div class="flash flash-error" style="margin-bottom:14px;padding:10px 12px;background:#fef2f2;border:1px solid #f87171;border-radius:6px;color:#991b1b" role="alert">
+                        <strong>Gagal membuat akun:</strong>
+                        <ul style="margin:4px 0 0 16px;padding:0;font-size:13px">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <form class="account-form" method="POST" action="{{ route('admin.users.store') }}">
+                    @csrf
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                        {{-- Baris 1: Nama dan Email --}}
+                        <div class="field" style="margin:0">
+                            <label for="name" style="font-size:13px;font-weight:600">Nama</label>
+                            <input id="name" name="name" value="{{ old('name') }}" autocomplete="name" required style="width:100%">
+                        </div>
+                        <div class="field" style="margin:0">
+                            <label for="email" style="font-size:13px;font-weight:600">Email</label>
+                            <input id="email" type="email" name="email" value="{{ old('email') }}" autocomplete="email" required style="width:100%">
+                        </div>
+                        {{-- Baris 2: Kata sandi awal dan Ulangi kata sandi --}}
+                        <div class="field" style="margin:0">
+                            <label for="password" style="font-size:13px;font-weight:600">Kata sandi awal (min 12)</label>
+                            <input id="password" type="password" name="password" autocomplete="new-password" minlength="12" required style="width:100%">
+                        </div>
+                        <div class="field" style="margin:0">
+                            <label for="password_confirmation" style="font-size:13px;font-weight:600">Ulangi kata sandi</label>
+                            <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" minlength="12" required style="width:100%">
+                        </div>
+                    </div>
+                    <div class="form-actions" style="margin-top:20px">
+                        <button class="button button-primary" type="submit">Buat akun editor</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    @endif
 @endsection

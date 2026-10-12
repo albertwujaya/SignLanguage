@@ -102,11 +102,11 @@
             </div>
             <div class="ov-filters">
                 <span class="meta">POPULAR:</span>
-                <button class="ov-tag" data-tag="halo">HALO</button>
-                <button class="ov-tag" data-tag="terima kasih">TERIMA KASIH</button>
-                <button class="ov-tag" data-tag="tolong">TOLONG</button>
-                <button class="ov-tag" data-tag="air">AIR</button>
-                <button class="ov-tag" data-tag="makan">MAKAN</button>
+                <button type="button" class="ov-tag" data-tag="halo">HALO</button>
+                <button type="button" class="ov-tag" data-tag="terima kasih">TERIMA KASIH</button>
+                <button type="button" class="ov-tag" data-tag="tolong">TOLONG</button>
+                <button type="button" class="ov-tag" data-tag="makan">MAKAN</button>
+                <button type="button" class="ov-tag" data-tag="apa kabar">APA KABAR</button>
             </div>
             <div id="sres" class="search-results-list" role="region" aria-live="polite"></div>
         </div>

@@ -96,7 +96,7 @@
                             <a class="icon-action" href="{{ route('admin.gestures.preview', $gesture) }}" title="Pratinjau" aria-label="Pratinjau {{ $gesture->word }}">
                                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
                             </a>
-                            <a class="icon-action" href="{{ route('admin.gestures.edit', $gesture) }}" title="Ubah" aria-label="Ubah {{ $gesture->word }}">
+                            <a class="icon-action" href="{{ route('admin.gestures.edit', array_filter(['gesture' => $gesture->id, 'from_level' => request('level')])) }}" title="Ubah" aria-label="Ubah {{ $gesture->word }}">
                                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                             </a>
 

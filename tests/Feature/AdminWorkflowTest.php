@@ -116,6 +116,24 @@ class AdminWorkflowTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
+    public function test_gesture_update_redirects_to_originating_level(): void
+    {
+        $editor = User::factory()->create(['role' => 'editor']);
+        $gesture = Gesture::create($this->gestureData([
+            'slug' => 'test-word',
+            'word' => 'Test Word',
+            'level' => 'kata',
+        ]));
+
+        $this->actingAs($editor)
+            ->put('/admin/gestures/'.$gesture->id, $this->gestureData([
+                'word' => 'Halo Baru',
+                'slug' => $gesture->slug,
+                'from_level' => 'kata',
+            ]))
+            ->assertRedirect(route('admin.gestures.index', ['level' => 'kata']));
+    }
+
     public function test_gesture_form_rejects_missing_required_fields(): void
     {
         $editor = User::factory()->create(['role' => 'editor']);

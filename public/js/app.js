@@ -1343,7 +1343,7 @@
         if (!targetCategory && !singleTargetGesture) {
             app.innerHTML = `
             <section class="page wrap" aria-label="Pilih Kategori Latihan">
-                <div class="page-header">
+                <div class="page-header practice-header">
                     <div class="meta">02 / PRACTICE</div>
                     <h1 class="big">PRACTICE</h1>
                     <p class="sub">Pilih kategori untuk memulai sesi latihan mandiri berbasis kamera.</p>
@@ -2489,6 +2489,57 @@
         searchInput.oninput = e => renderSearchResults(e.target.value);
     }
 
+    function updatePopularTags() {
+        const filtersContainer = document.querySelector('.ov-filters');
+        if (!filtersContainer || !GESTURES || !GESTURES.length) return;
+
+        const candidates = ['halo', 'terima kasih', 'tolong', 'makan', 'apa kabar', 'selamat tinggal', 'hari ini', 'nama', 'tidur'];
+        const matched = [];
+
+        candidates.forEach(cand => {
+            const found = GESTURES.find(g => {
+                const idw = (g.id_word || '').toLowerCase();
+                const enw = (g.w || '').toLowerCase();
+                return idw.includes(cand) || enw.includes(cand);
+            });
+            if (found && matched.length < 5) {
+                const cleanWord = (found.id_word || found.w).split('/')[0].trim().toUpperCase();
+                if (!matched.some(m => m.tag === cand)) {
+                    matched.push({ tag: cand, label: cleanWord });
+                }
+            }
+        });
+
+        if (matched.length < 5) {
+            GESTURES.forEach(g => {
+                if (matched.length >= 5) return;
+                const cleanWord = (g.id_word || g.w).split('/')[0].trim().toUpperCase();
+                const cand = cleanWord.toLowerCase();
+                if (!matched.some(m => m.label === cleanWord)) {
+                    matched.push({ tag: cand, label: cleanWord });
+                }
+            });
+        }
+
+        if (matched.length > 0) {
+            let html = '<span class="meta">POPULAR:</span>';
+            matched.forEach(item => {
+                html += `<button type="button" class="ov-tag" data-tag="${escapeHtml(item.tag)}">${escapeHtml(item.label)}</button>`;
+            });
+            filtersContainer.innerHTML = html;
+
+            filtersContainer.querySelectorAll('.ov-tag').forEach(tagBtn => {
+                tagBtn.onclick = () => {
+                    const tag = tagBtn.dataset.tag;
+                    if (searchInput) {
+                        searchInput.value = tag;
+                        renderSearchResults(tag);
+                    }
+                };
+            });
+        }
+    }
+
     $$('.ov-tag').forEach(tagBtn => {
         tagBtn.onclick = () => {
             const tag = tagBtn.dataset.tag;
@@ -2598,6 +2649,8 @@
         } finally {
             clearTimeout(timer);
         }
+
+        updatePopularTags();
 
         const countEl = document.getElementById('ft-total-signs');
         if (countEl) countEl.textContent = `${GESTURES.length} GESTUR` + (dataState === 'fallback' ? ' (CONTOH)' : '');

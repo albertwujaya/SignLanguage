@@ -214,6 +214,44 @@ nav.top a::after { display: none; }
 .page-header .big { font-size: clamp(38px, 10.5vw, 120px); overflow-wrap: anywhere; }
 .page-header .sub { margin: 14px 0 28px; }
 
+/* ---- Header Practice: jarak rapat proporsional dengan daftar kategori ---- */
+.practice-header {
+    margin-bottom: 16px !important;
+    padding-bottom: 14px !important;
+    border-bottom: 2px solid var(--line);
+}
+.practice-header .big {
+    margin-bottom: 4px;
+}
+.practice-header .sub {
+    margin: 6px 0 0 !important;
+}
+
+/* ---- Tombol Back Proporsional di Seluruh Halaman (tidak jomplang/kekecilan) ---- */
+.lesson-back-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 18px !important;
+    background: #fff !important;
+    color: var(--ink) !important;
+    border: 2px solid var(--ink) !important;
+    border-radius: 999px !important;
+    box-shadow: 2.5px 2.5px 0 var(--ink) !important;
+    font-family: var(--font-heading) !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.04em !important;
+    text-decoration: none !important;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease !important;
+}
+.lesson-back-btn:hover {
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 3.5px 3.5px 0 var(--ink) !important;
+    background: var(--mustard) !important;
+    color: var(--ink) !important;
+}
+
 /* ---- Kartu fitur di beranda: ada ruang dalam, jarak antar kartu ---- */
 .feature-editorial-list { display: flex; flex-direction: column; gap: 32px; padding-top: 48px; padding-bottom: 80px; }
 .feat-item { padding: clamp(24px, 4vw, 52px); gap: clamp(20px, 3vw, 40px); }

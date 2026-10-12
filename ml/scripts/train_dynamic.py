@@ -66,17 +66,24 @@ def fit(Xs, ys):
     ).fit(scaler.transform(Xa), ya)
     return scaler, clf
 
-
 # --- Evaluasi: sebisa mungkin uji pada ORANG yang tidak dipakai melatih ---
-try:
+def split_indices():
+    """Pembagian latih/uji. Utamakan per orang; kalau tidak mungkin, acak per klip."""
     if len(set(who)) >= 2:
         tr, te = next(GroupShuffleSplit(n_splits=1, test_size=0.3, random_state=42).split(X, y, who))
-        if set(yi[tr]) != set(yi):
-            raise ValueError("ada label yang hilang dari data latih")
-        print("\nEvaluasi: uji pada orang yang tidak dipakai melatih (lebih jujur)")
+        if set(yi[tr]) == set(yi):
+            return tr, te, "Evaluasi: uji pada orang yang tidak dipakai melatih (lebih jujur)."
+        alasan = "ada kata yang hanya direkam satu orang"
     else:
-        tr, te = train_test_split(np.arange(len(X)), test_size=0.25, stratify=yi, random_state=42)
-        print("\nEvaluasi: baru 1 orang, hasilnya cenderung terlalu optimis. Tambah data teman.")
+        alasan = "baru 1 orang"
+    tr, te = train_test_split(np.arange(len(X)), test_size=0.25, stratify=yi, random_state=42)
+    return tr, te, (f"Evaluasi: {alasan}, jadi uji dilakukan ACAK per klip. Hasilnya cenderung "
+                    "terlalu optimis. Minta orang lain merekam SEMUA kata supaya ujinya jujur.")
+
+
+try:
+    tr, te, info = split_indices()
+    print("\n" + info)
     sc, clf = fit(X[tr], yi[tr])
     print(classification_report(yi[te], clf.predict(sc.transform(X[te])), labels=range(len(CLASSES)),
                                 target_names=CLASSES, zero_division=0))

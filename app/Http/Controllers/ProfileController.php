@@ -47,11 +47,24 @@ class ProfileController extends Controller
             ->filter()
             ->groupBy('level');
 
+        $learnedGestureIds = $user->gestureProgress()
+            ->whereNotNull('learned_at')
+            ->pluck('gesture_id')
+            ->all();
+
+        $catalogByLevel = Gesture::published()
+            ->orderBy('sort_order')
+            ->orderBy('word')
+            ->get()
+            ->groupBy('level');
+
         return view('profile', [
             'user' => $user,
             'levels' => $levels,
             'sessions' => $sessions,
             'stickers' => $stickers,
+            'learnedGestureIds' => $learnedGestureIds,
+            'catalogByLevel' => $catalogByLevel,
             'averageScore' => $user->practiceSessions()->avg('score'),
             'sessionCount' => $user->practiceSessions()->count(),
         ]);

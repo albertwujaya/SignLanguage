@@ -13,13 +13,16 @@
             @if ($gesture->exists)
                 <a class="button button-quiet" href="{{ route('admin.gestures.preview', $gesture) }}">Pratinjau</a>
             @endif
-            <a class="button button-quiet" href="{{ route('admin.gestures.index') }}">Kembali ke daftar</a>
+            <a class="button button-quiet" href="{{ route('admin.gestures.index', !empty($fromLevel) ? ['level' => $fromLevel] : []) }}">Kembali ke daftar</a>
         </div>
     </div>
 
     <form class="data-form" method="POST" enctype="multipart/form-data" action="{{ $gesture->exists ? route('admin.gestures.update', $gesture) : route('admin.gestures.store') }}">
         @csrf
         @if ($gesture->exists) @method('PUT') @endif
+        @if (!empty($fromLevel))
+            <input type="hidden" name="from_level" value="{{ $fromLevel }}">
+        @endif
         <div class="form-grid">
             <div class="field">
                 <label for="word">Istilah</label>

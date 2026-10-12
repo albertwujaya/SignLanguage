@@ -32,23 +32,34 @@ class GestureController extends Controller
             ->orderBy('sort_order')
             ->orderBy('word');
 
+        $stats = Gesture::selectRaw('level, status, count(*) as count')
+            ->groupBy('level', 'status')
+            ->get();
+
         $countsByLevel = [];
         foreach (Gesture::LEVELS as $lvlKey => $lvlLabel) {
+            $lvlStats = $stats->where('level', $lvlKey);
+            $published = (int) $lvlStats->where('status', Gesture::STATUS_PUBLISHED)->sum('count');
+            $draft = (int) $lvlStats->where('status', Gesture::STATUS_DRAFT)->sum('count');
             $countsByLevel[$lvlKey] = [
-                'published' => Gesture::where('level', $lvlKey)->published()->count(),
-                'draft' => Gesture::where('level', $lvlKey)->where('status', Gesture::STATUS_DRAFT)->count(),
-                'total' => Gesture::where('level', $lvlKey)->count(),
+                'published' => $published,
+                'draft' => $draft,
+                'total' => $published + $draft,
             ];
         }
+
+        $totalCount = (int) $stats->sum('count');
+        $publishedCount = (int) $stats->where('status', Gesture::STATUS_PUBLISHED)->sum('count');
+        $draftCount = (int) $stats->where('status', Gesture::STATUS_DRAFT)->sum('count');
 
         return view('admin.gestures.index', [
             'gestures' => $query->paginate(15)->withQueryString(),
             'levels' => Gesture::LEVELS,
             'currentLevel' => $request->level,
             'countsByLevel' => $countsByLevel,
-            'totalCount' => Gesture::count(),
-            'publishedCount' => Gesture::published()->count(),
-            'draftCount' => Gesture::where('status', Gesture::STATUS_DRAFT)->count(),
+            'totalCount' => $totalCount,
+            'publishedCount' => $publishedCount,
+            'draftCount' => $draftCount,
             'trashedCount' => Gesture::onlyTrashed()->count(),
             'categoryLabels' => Gesture::CATEGORY_LABELS,
         ]);
@@ -76,6 +87,7 @@ class GestureController extends Controller
             'levels' => Gesture::LEVELS,
             'fixedLevel' => $level,
             'levelCategories' => Gesture::LEVEL_CATEGORIES,
+            'fromLevel' => $request->query('level'),
         ]);
     }
 
@@ -88,11 +100,15 @@ class GestureController extends Controller
 
         AdminActivityLog::record('create', $gesture, "Menambahkan gesture '{$gesture->word}' ({$gesture->level})");
 
-        return to_route('admin.gestures.index')->with('status', 'Gesture berhasil ditambahkan.');
+        $fromLevel = $request->input('from_level') ?? $request->query('from_level');
+        $params = ($fromLevel && array_key_exists($fromLevel, Gesture::LEVELS)) ? ['level' => $fromLevel] : [];
+
+        return to_route('admin.gestures.index', $params)->with('status', 'Gesture berhasil ditambahkan.');
     }
 
-    public function edit(Gesture $gesture): View
+    public function edit(Request $request, Gesture $gesture): View
     {
+        $fromLevel = $request->query('from_level');
         $level = $gesture->level ?: 'kata';
         $allowedCategories = Gesture::LEVEL_CATEGORIES[$level] ?? Gesture::CATEGORIES;
 
@@ -104,6 +120,7 @@ class GestureController extends Controller
             'levels' => Gesture::LEVELS,
             'fixedLevel' => $level,
             'levelCategories' => Gesture::LEVEL_CATEGORIES,
+            'fromLevel' => $fromLevel,
         ]);
     }
 
@@ -114,7 +131,10 @@ class GestureController extends Controller
 
         AdminActivityLog::record('update', $gesture, "Memperbarui gesture '{$gesture->word}'");
 
-        return to_route('admin.gestures.index')->with('status', 'Gesture berhasil diperbarui.');
+        $fromLevel = $request->input('from_level') ?? $request->query('from_level');
+        $params = ($fromLevel && array_key_exists($fromLevel, Gesture::LEVELS)) ? ['level' => $fromLevel] : [];
+
+        return to_route('admin.gestures.index', $params)->with('status', 'Gesture berhasil diperbarui.');
     }
 
     public function destroy(Gesture $gesture): RedirectResponse

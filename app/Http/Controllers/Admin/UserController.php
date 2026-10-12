@@ -89,7 +89,9 @@ class UserController extends Controller
             'adminCount' => User::query()->where('role', 'admin')->count(),
             'editorCount' => User::query()->where('role', 'editor')->count(),
             'userCount' => User::query()->whereNotIn('role', ['admin', 'editor'])->count(),
-            'staffMembers' => User::query()->whereIn('role', ['admin', 'editor'])->orderByRaw("CASE WHEN role = 'admin' THEN 1 ELSE 2 END")->orderBy('name')->get(),
+            'staffMembers' => $tab === 'staff'
+                ? User::query()->whereIn('role', ['admin', 'editor'])->orderByRaw("CASE WHEN role = 'admin' THEN 1 ELSE 2 END")->orderBy('name')->get()
+                : collect(),
             'currentTab' => $tab ?? 'students',
         ]);
     }
