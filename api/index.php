@@ -11,7 +11,7 @@ $directories = [
 ];
 
 foreach ($directories as $directory) {
-    if (!file_exists($directory)) {
+    if (! file_exists($directory)) {
         mkdir($directory, 0755, true);
     }
 }
@@ -27,4 +27,4 @@ $_ENV['APP_PACKAGES_CACHE'] = '/tmp/bootstrap/cache/packages.php';
 $_ENV['APP_ROUTES_CACHE'] = '/tmp/bootstrap/cache/routes.php';
 
 // 3. Panggil entry point utama Laravel
-require __DIR__ . '/../public/index.php';
+require __DIR__.'/../public/index.php';
