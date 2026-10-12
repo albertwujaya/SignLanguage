@@ -58,21 +58,21 @@
     <footer class="site-footer">
         <div class="footer-wrap">
             <div class="footer-left">
-                <span class="meta cy">SIGN LANGUAGE / PROYEK LOMBA KAMPUS</span>
-                <p class="footer-desc">Pengenalan gestur lewat kamera masih berupa simulasi, dan isi kamus belum diverifikasi oleh penutur BISINDO.</p>
+                <span class="meta cy">SIGNESIA | SIGN LANGUAGE</span>
+                <p class="footer-desc">Pengenalan gestur lewat kamera berupa simulasi, dan kamus BISINDO.</p>
                 <a class="footer-link" href="#/about">Tentang kami</a>
             </div>
             <div class="footer-meta-grid">
                 <div>
-                    <span class="meta">KAMERA</span>
-                    <span class="val">MASIH SIMULASI</span>
+                    <span class="meta">BELAJAR,</span>
+                    <span class="val"></span>
                 </div>
                 <div>
-                    <span class="meta">ISI KAMUS</span>
-                    <span class="val">BELUM DIVERIFIKASI</span>
+                    <span class="meta">LATIHAN</span>
+                    <span class="val"></span>
                 </div>
                 <div>
-                    <span class="meta">KOSAKATA</span>
+                    <span class="meta">KAMUS</span>
                     <span class="val" id="ft-total-signs">&mdash;</span>
                 </div>
             </div>

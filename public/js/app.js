@@ -826,9 +826,9 @@
     function about() {
         // GANTI: nama & peran anggota tim (sementara masih placeholder)
         const team = [
-            { name: 'a', role: 'xyz' },
-            { name: 'b', role: 'yxz' },
-            { name: 'c', role: 'zyx' }
+            { name: 'Albert Hans', role: 'mengatur deployment dan kontribusi dataset' },
+            { name: 'Nada Gaming', role: 'membuat konsep dan dasar website serta kontribusi dataset' },
+            { name: 'Dini Sleepy', role: 'improvisasi tampilan website dan kontribusi dataset' }
         ];
 
         // GANTI: kontak tim (sementara masih placeholder)
@@ -877,7 +877,7 @@
                     <h2 id="about-note-title">Masih dalam pengembangan</h2>
                     <dl>
                         <div><dt>Konten</dt><dd>Deskripsi gerakan belum diperiksa oleh penutur BISINDO atau juru bahasa isyarat. Bisa jadi ada yang kurang tepat.</dd></div>
-                        <div><dt>Sumber</dt><dd>Video YouTube dan referensi di internet. Daftar sumber lengkapnya akan kami tambahkan.</dd></div>
+                        <div><dt>Sumber</dt><dd>Video YouTube dan referensi di internet. Website: intelektuli.id + disabilitasku.id dan YouTube.</dd></div>
                         <div><dt>Kamera</dt><dd>Pengenalan gestur masih tahap awal dan sebagian masih berupa simulasi.</dd></div>
                     </dl>
                     <p>Kalau kamu menemukan yang keliru, kabari kami lewat kontak di bawah. Koreksi dari komunitas Tuli sangat berarti bagi kami.</p>
@@ -903,16 +903,6 @@
                 <p class="about-text">Laravel untuk sisi server, dan MediaPipe Hands untuk melacak tangan lewat kamera.</p>
             </div>
 
-            <div class="about-block">
-                <h2>Punya koreksi, saran, atau pertanyaan?</h2>
-                <dl class="about-contact">
-                    ${contacts.map(c => `
-                        <div>
-                            <dt>${c.label}</dt>
-                            <dd>${c.href ? `<a href="${c.href}">${c.value}</a>` : c.value}</dd>
-                        </div>`).join('')}
-                </dl>
-            </div>
         </section>`;
     }
 
