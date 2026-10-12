@@ -41,6 +41,7 @@
     const $ = (s, r = document) => r.querySelector(s);
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
     const pad = n => String(n).padStart(2, '0');
+    const escapeHtml = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const byCat = c => GESTURES.filter(g => g.c === c);
     // Teks arti utama = bahasa Indonesia (BISINDO). Bahasa Inggris hanya pendamping kecil.
     const idw = g => (g && (g.id_word || g.w)) || '';
@@ -585,7 +586,8 @@
                 });
 
                 const useNum = window.recogMode === 'angka' && NUM.ready;
-                if (useNum || LETTER.ready) {
+                const useAlpha = window.recogMode === 'huruf' && LETTER.ready;
+                if (useNum || useAlpha) {
                     if (recent.mode !== window.recogMode) { recent.length = 0; recent.mode = window.recogMode; }
                     recent.push(predictLetter(buildFeatures(res), useNum ? NUM.model : LETTER.model));
                     if (recent.length > 6) recent.shift();
@@ -594,10 +596,10 @@
                     const top = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
                     const ps = recent.filter(r => r.letter === top).map(r => r.p);
                     const conf = Math.round((ps.reduce((s, v) => s + v, 0) / ps.length) * 100);
-                                        const card = useNum ? GESTURES.find(g => numberOf(g) === top) : GESTURES.find(g => g.level === 'abjad' && letterOf(g) === top);
+                    const card = useNum ? GESTURES.find(g => numberOf(g) === top) : GESTURES.find(g => g.level === 'abjad' && letterOf(g) === top);
                     window.latestRealGesture = { id: card ? card.id : top.toLowerCase(), w: top, letter: top, e: '', conf };
                 } else {
-                    window.latestRealGesture = classifyHandLandmarks(res.landmarks[0]);;
+                    window.latestRealGesture = classifyHandLandmarks(res.landmarks[0]);
                 }
                 const g = window.latestRealGesture;
                 if (label && g) label.textContent = `${g.letter || idwById(g.id, g.w)} (${g.conf}% KEYAKINAN)`;
@@ -1670,8 +1672,8 @@
                 if (!trackingBox) return;
 
                 const isNum = !!numberOf(currentSign);
-                window.recogMode = isNum ? 'angka' : 'huruf';
                 const targetLetter = isNum ? numberOf(currentSign) : letterOf(currentSign);
+                window.recogMode = isNum ? 'angka' : (targetLetter ? 'huruf' : 'kata');
                 const useModel = !forcePass && (isNum ? NUM.ready : LETTER.ready) && targetLetter;
                 let pass = forcePass;
                 let confidence = 88;
@@ -1691,13 +1693,22 @@
                     if (holdCount < 4) return;
                     pass = true;
                 } else if (!forcePass && window.latestRealGesture) {
-                    pass = (window.latestRealGesture.id === currentSign.id || window.latestRealGesture.w.includes(currentSign.w));
+                    const matchesWord = (window.latestRealGesture.id === currentSign.id || (currentSign.w && window.latestRealGesture.w && window.latestRealGesture.w.includes(currentSign.w)));
+                    if (!matchesWord) {
+                        holdCount = 0;
+                        detectedWord.textContent = idwById(window.latestRealGesture.id, window.latestRealGesture.w);
+                        detectedConf.textContent = `${window.latestRealGesture.conf || 80}%`;
+                        return;
+                    }
                     confidence = window.latestRealGesture.conf || 95;
+                    holdCount++;
+                    if (holdCount < 3) return;
+                    pass = true;
                 } else if (!forcePass) {
-                    pass = Math.random() < 0.82;
-                    confidence = pass ? 88 + Math.floor(Math.random() * 11) : 42 + Math.floor(Math.random() * 25);
+                    // Jangan pernah next otomatis kalau tangan belum cocok
+                    pass = false;
+                    return;
                 }
-
                 isEvaluating = true;
 
                 if (pass) {
@@ -1767,7 +1778,7 @@
                 isRunning = true;
                 holdCount = 0;
                 clearInterval(cameraTimer);
-                cameraTimer = setInterval(evaluateGesture, LETTER.ready ? 250 : 3400);
+                cameraTimer = setInterval(evaluateGesture, 300);
                 const word = $('#cam-detected-word');
                 if (word) word.textContent = `LISTENING FOR: ${idw(currentSign)}`;
             };
@@ -2638,7 +2649,7 @@
     // =========================================================================
     // PEMUATAN DATA: loading, error (data contoh), dan kosong
     // =========================================================================
-    const gesturesUrl = window.GESTURES_FALLBACK_URL || window.GESTURES_URL || '/api/gestures';
+    const gesturesUrl = window.GESTURES_URL || '/api/gestures';
     const NEEDS_DATA = ['learn', 'practice', 'translate', 'dictionary'];
     let dataState = 'loading'; // 'loading' | 'ready' | 'fallback'
 
