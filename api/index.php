@@ -37,9 +37,20 @@ $app->useStoragePath('/tmp/storage');
 // 5. Jalankan Kernel Aplikasi
 $kernel = $app->make(Kernel::class);
 
-$response = $kernel->handle(
-    $request = Request::capture()
-);
+$request = Request::capture();
+
+// Jika diakses melalui serverless proxy Vercel dan PATH_INFO kosong namun REQUEST_URI terisi
+if (empty($_SERVER['PATH_INFO']) && ! empty($_SERVER['REQUEST_URI'])) {
+    $uriParts = explode('?', $_SERVER['REQUEST_URI'], 2);
+    $path = $uriParts[0];
+    if (str_starts_with($path, '/api/index.php')) {
+        $path = substr($path, strlen('/api/index.php')) ?: '/';
+    }
+    $request->server->set('REQUEST_URI', $path.(isset($uriParts[1]) ? '?'.$uriParts[1] : ''));
+    $request = Request::createFromBase($request);
+}
+
+$response = $kernel->handle($request);
 
 // BAHAN PERBAIKAN: Paksa Vercel & Browser untuk TIDAK menyimpan cache halaman
 $response->headers->set('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');

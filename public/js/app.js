@@ -2701,7 +2701,12 @@
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 10000);
         try {
-            const res = await fetch(gesturesUrl, { headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+            let res = await fetch(gesturesUrl, { headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+            if (!res.ok && res.status === 404 && !gesturesUrl.includes('index.php')) {
+                // Vercel serverless workaround jika rute rewrite diarahkan via /api/index.php
+                const fallbackUrl = gesturesUrl.replace('/api/gestures', '/api/index.php/api/gestures');
+                res = await fetch(fallbackUrl, { headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+            }
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
             if (!Array.isArray(data)) throw new Error('Format data tidak dikenali');

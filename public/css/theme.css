@@ -78,8 +78,27 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 .gesture-card-item { transition: transform .2s cubic-bezier(.3,1.5,.5,1), box-shadow .2s; }
 .gesture-card-item:nth-child(3n+1) { transform: rotate(-.8deg); }
 .gesture-card-item:nth-child(3n+2) { transform: rotate(.6deg); }
-.gesture-card-item:hover { transform: translate(-2px,-4px) rotate(0); }
-.cat-gesture-tag { background: var(--bg3); color: var(--ink); border: 2px solid var(--ink); border-radius: 999px; }
+.cat-badges-preview {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+}
+.cat-gesture-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg3);
+    color: var(--ink);
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
 .cat-row-num { font-family: var(--font-heading); color: var(--cy); }
 .cat-progress-bar { background: var(--bg3); border: 2.5px solid var(--ink); border-radius: 999px; overflow: hidden; }
 .cat-progress-bar b { background: repeating-linear-gradient(45deg, var(--sage) 0 10px, #92BB8D 10px 20px); }
