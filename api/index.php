@@ -1,6 +1,6 @@
 <?php
 
-// 1. Buat direktori yang dibutuhkan di /tmp
+// 1. Buat folder temporary yang hanya dibutuhkan untuk cache & view Laravel
 $directories = [
     '/tmp/storage/run',
     '/tmp/storage/framework/views',
@@ -16,15 +16,13 @@ foreach ($directories as $directory) {
     }
 }
 
-// 2. Set environment variable untuk jalur storage & cache ke /tmp
+// 2. Set environment path internal
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
+putenv('LOG_CHANNEL=stderr');
+
 $_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
-
+$_ENV['LOG_CHANNEL'] = 'stderr';
 $_ENV['APP_STORAGE_PATH'] = '/tmp/storage';
-$_ENV['APP_CONFIG_CACHE'] = '/tmp/bootstrap/cache/config.php';
-$_ENV['APP_SERVICES_CACHE'] = '/tmp/bootstrap/cache/services.php';
-$_ENV['APP_PACKAGES_CACHE'] = '/tmp/bootstrap/cache/packages.php';
-$_ENV['APP_ROUTES_CACHE'] = '/tmp/bootstrap/cache/routes.php';
 
-// 3. Panggil entry point utama Laravel
-require __DIR__.'/../public/index.php';
+// 3. Jalankan entry point Laravel
+require __DIR__ . '/../public/index.php';
