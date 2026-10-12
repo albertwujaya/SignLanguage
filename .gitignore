@@ -34,3 +34,6 @@ ml/models/*.joblib
 ml/dataset/own/
 
 __pycache__/
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+/storage/framework/views/*
