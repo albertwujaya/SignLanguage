@@ -1,6 +1,6 @@
 <?php
 
-// 1. Buat direktori sementara di /tmp
+// 1. Buat folder temporary yang dibutuhkan untuk cache & view Laravel
 $directories = [
     '/tmp/storage/run',
     '/tmp/storage/framework/views',
@@ -16,9 +16,9 @@ foreach ($directories as $directory) {
     }
 }
 
-// 2. Set environment variabel untuk storage & cache
+// 2. Set environment path ke /tmp
 putenv('APP_STORAGE_PATH=/tmp/storage');
 putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
 
-// 3. Panggil entry point Laravel
+// 3. Jalankan entry point Laravel
 require __DIR__ . '/../public/index.php';
