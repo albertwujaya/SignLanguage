@@ -7,7 +7,11 @@
   },
   "routes": [
     {
-      "src": "/(css|js|fonts|images|models|build|storage)/(.*)",
+      "src": "/storage/gestures/(.*)",
+      "dest": "/public/gestures/$1"
+    },
+    {
+      "src": "/(css|js|fonts|images|models|build|gestures)/(.*)",
       "dest": "/public/$1/$2"
     },
     {
