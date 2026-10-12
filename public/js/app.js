@@ -1175,10 +1175,14 @@
                                     : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>`
                                 }
                             </span>
-                            <span class="wli-word">${idw(g)}</span>
-                            ${enw(g) ? `<span class="wli-en">${enw(g)}</span>` : ''}
-                            <span class="wli-diff pill">${diffLabel(g.diff)}</span>
-                            <span class="wli-arrow" aria-hidden="true">→</span>
+                            <div class="wli-text">
+                                <span class="wli-word">${idw(g)}</span>
+                                ${enw(g) ? `<span class="wli-en">${enw(g)}</span>` : ''}
+                            </div>
+                            <div class="wli-meta">
+                                <span class="wli-diff pill">${diffLabel(g.diff)}</span>
+                                <span class="wli-arrow" aria-hidden="true">→</span>
+                            </div>
                         </a>
                     </li>`;
                 }).join('')}

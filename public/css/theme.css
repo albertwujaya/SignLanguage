@@ -252,6 +252,133 @@ nav.top a::after { display: none; }
     color: var(--ink) !important;
 }
 
+/* ---- Daftar Kata/Kalimat Kategori (Warna Krem Scrapbook & Ukuran Seragam) ---- */
+.word-list-grid {
+    list-style: none;
+    margin: 24px 0 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 16px;
+    align-items: stretch;
+}
+.word-list-grid > li {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+.word-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    min-height: 82px;
+    padding: 14px 18px;
+    background: var(--paper) !important; /* Warna krem kertas scrapbook */
+    color: var(--ink) !important;
+    border: 2.5px solid var(--ink) !important;
+    border-radius: var(--radius-md, 16px) !important;
+    box-shadow: 4px 4px 0 var(--ink) !important;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: transform .15s cubic-bezier(.3,1.6,.5,1), box-shadow .15s ease, background-color .15s ease;
+}
+.word-list-item:hover,
+.word-list-item:focus-visible {
+    background: #FFF3CF !important; /* Krem mentega hangat saat hover */
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 var(--ink) !important;
+    border-color: var(--ink) !important;
+    outline: none;
+}
+.word-list-item:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink) !important;
+}
+.word-list-item.is-learned {
+    background: #F4F8EE !important; /* Krem beraksen sage lembut untuk yang selesai */
+    border-color: var(--ink) !important;
+}
+.word-list-item.is-learned:hover {
+    background: #EAF4E3 !important;
+}
+.wli-check {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    border: 2px solid var(--ink);
+    background: var(--bg3);
+    color: var(--t2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.word-list-item.is-learned .wli-check {
+    background: #BFE2BE;
+    color: #1E4620;
+    border-color: var(--ink);
+}
+.wli-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+}
+.wli-word {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink) !important;
+    letter-spacing: 0.02em;
+    line-height: 1.25;
+    word-break: break-word;
+}
+.wli-en {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--t3) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+}
+.wli-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.wli-diff.pill {
+    background: var(--paper) !important;
+    color: var(--ink) !important;
+    border: 2px solid var(--ink) !important;
+    border-radius: 999px !important;
+    box-shadow: 2px 2px 0 var(--ink) !important;
+    padding: 3px 10px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.wli-arrow {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--ink) !important;
+    transition: transform .15s ease;
+}
+.word-list-item:hover .wli-arrow,
+.word-list-item:focus-visible .wli-arrow {
+    transform: translateX(3px);
+    color: var(--ink) !important;
+}
+
 /* ---- Kartu fitur di beranda: ada ruang dalam, jarak antar kartu ---- */
 .feature-editorial-list { display: flex; flex-direction: column; gap: 32px; padding-top: 48px; padding-bottom: 80px; }
 .feat-item { padding: clamp(24px, 4vw, 52px); gap: clamp(20px, 3vw, 40px); }
