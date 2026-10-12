@@ -2638,7 +2638,7 @@
     // =========================================================================
     // PEMUATAN DATA: loading, error (data contoh), dan kosong
     // =========================================================================
-    const gesturesUrl = window.GESTURES_URL || '/api/gestures';
+    const gesturesUrl = window.GESTURES_FALLBACK_URL || window.GESTURES_URL || '/api/gestures';
     const NEEDS_DATA = ['learn', 'practice', 'translate', 'dictionary'];
     let dataState = 'loading'; // 'loading' | 'ready' | 'fallback'
 
