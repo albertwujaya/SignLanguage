@@ -8,7 +8,35 @@ use Illuminate\Validation\Rule;
 
 class GestureRequest extends FormRequest
 {
-    public const CATEGORIES = ['greet', 'conv', 'needs', 'emerg', 'num', 'alpha'];
+    public const CATEGORIES = ['greet', 'conv', 'days', 'verbs', 'num', 'alpha'];
+
+    /**
+     * Label manusiawi untuk setiap kategori (ditampilkan di panel admin).
+     *
+     * @var array<string, string>
+     */
+    public const CATEGORY_LABELS = [
+        'greet' => 'Basic Greetings',
+        'conv'  => 'Daily Conversation',
+        'days'  => 'Days of the Week',
+        'verbs' => 'Verbs',
+        'num'   => 'Numbers',
+        'alpha' => 'Alphabet',
+    ];
+
+    /**
+     * Kategori yang valid per jenjang.
+     * Dipakai untuk validasi kombinasi level–category dan untuk membatasi
+     * dropdown kategori di panel admin per jenis (Tahap 4).
+     *
+     * @var array<string, string[]>
+     */
+    public const LEVEL_CATEGORIES = [
+        'abjad'   => ['alpha'],
+        'angka'   => ['num'],
+        'kata'    => ['greet', 'conv', 'days', 'verbs'],
+        'kalimat' => ['greet', 'conv'],
+    ];
 
     public const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
@@ -46,6 +74,43 @@ class GestureRequest extends FormRequest
             'video' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm', 'max:30720'],
             'remove_image' => ['nullable', 'boolean'],
             'remove_video' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * Validasi tambahan: pastikan kombinasi level–category valid.
+     */
+    public function withValidator(\Illuminate\Validation\Validator $validator): void
+    {
+        $validator->after(function (\Illuminate\Validation\Validator $v): void {
+            $level    = $this->input('level');
+            $category = $this->input('category');
+
+            if ($level && $category && isset(self::LEVEL_CATEGORIES[$level])) {
+                $allowed = self::LEVEL_CATEGORIES[$level];
+                if (! in_array($category, $allowed, true)) {
+                    $levelLabel    = Gesture::LEVELS[$level] ?? $level;
+                    $allowedLabels = implode(', ', array_map(
+                        fn (string $c) => self::CATEGORY_LABELS[$c] ?? $c,
+                        $allowed
+                    ));
+                    $v->errors()->add(
+                        'category',
+                        "Jenjang \"{$levelLabel}\" hanya boleh memakai kategori: {$allowedLabels}."
+                    );
+                }
+            }
+        });
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'category.required' => 'Kategori wajib dipilih.',
+            'level.required'    => 'Jenjang wajib dipilih.',
         ];
     }
 }

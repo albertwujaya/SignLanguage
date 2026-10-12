@@ -8,20 +8,20 @@
 
     // Categories Configuration
     const CATS = [
-        ['greet', 'BASIC GREETINGS', 'Start with the signs you use every day in standard interaction.'],
-        ['conv', 'DAILY CONVERSATION', 'Keep a natural, fluent exchange going with ease and clarity.'],
-        ['needs', 'NEEDS & REQUESTS', 'Express essential daily necessities and immediate requests.'],
-        ['emerg', 'EMERGENCY', 'Critical gestures that matter most when moments and safety count.'],
-        ['num', 'NUMBERS', 'Count, price, and quantity: the numbers you reach for all the time.'],
-        ['alpha', 'ALPHABET', 'Spell names and new words letter by letter with the manual alphabet.']
+        ['greet', 'BASIC GREETINGS',   'Start with the signs you use every day in standard interaction.'],
+        ['conv',  'DAILY CONVERSATION', 'Keep a natural, fluent exchange going with ease and clarity.'],
+        ['days',  'DAYS OF THE WEEK',   'Name the days of the week with clear and confident gestures.'],
+        ['verbs', 'VERBS',              'Express everyday actions: eat, drink, sleep, study and more.'],
+        ['num',   'NUMBERS',            'Count, price, and quantity: the numbers you reach for all the time.'],
+        ['alpha', 'ALPHABET',           'Spell names and new words letter by letter with the manual alphabet.']
     ];
 
     const CN = {
         greet: 'Basic Greetings',
-        conv: 'Daily Conversation',
-        needs: 'Needs & Requests',
-        emerg: 'Emergency',
-        num: 'Numbers',
+        conv:  'Daily Conversation',
+        days:  'Days of the Week',
+        verbs: 'Verbs',
+        num:   'Numbers',
         alpha: 'Alphabet'
     };
 
@@ -1025,13 +1025,297 @@
     }
 
     // =========================================================================
-    // LEARN VIEW (Category Overview & Lesson Detail)
+    // LEARN VIEW — Overview > Daftar Kata per Kategori > Flip Card Detail
+    // Tahap 2: #/learn → pilih kategori, #/learn/<cat> → daftar kata,
+    //          #/learn/<cat>/<slug> → flip card detail
     // =========================================================================
-    function learn(param) {
+    function learn(param, slug) {
+        // #/learn/<cat>/<slug> → tampilkan flip card
+        if (param && slug) {
+            const cat = CATS.find(c => c[0] === param);
+            const gesture = GESTURES.find(g => g.id === slug);
+            if (cat && gesture) {
+                return renderLessonCard(cat, gesture);
+            }
+        }
+
+        // #/learn/<cat> → tampilkan daftar kata kategori itu
         if (param) {
             const cat = CATS.find(c => c[0] === param);
-            if (cat) return renderLessonDetail(cat, 0);
+            if (cat) return renderCategoryWordList(cat);
         }
+
+        // #/learn → tampilkan daftar semua kategori
+        const totalLearned = learned.size;
+        const totalSigns = GESTURES.length || 32;
+        const totalProgress = Math.round((totalLearned / totalSigns) * 100);
+
+        app.innerHTML = `
+        <section class="page wrap" aria-label="Learning Curriculum">
+            <div class="page-header">
+                <div class="meta">01 / LEARN</div>
+                <h1 class="big">LEARN</h1>
+                <p class="sub">Build your vocabulary, one gesture at a time.</p>
+                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                    <span class="pill cyan">TOTAL PROGRESS: ${totalProgress}%</span>
+                    <span class="meta">${totalLearned} OF ${totalSigns} GESTURES MASTERED</span>
+                </div>
+            </div>
+
+            <div class="level-tabs" role="tablist" aria-label="Jenjang belajar">
+                ${['all', 'abjad', 'angka', 'kata', 'kalimat'].map(l => `<button class="level-tab${learnLevel === l ? ' on' : ''}" role="tab" aria-selected="${learnLevel === l}" data-level="${l}">${l === 'all' ? 'SEMUA' : LEVEL_LABELS[l]}</button>`).join('')}
+            </div>
+            ${learnLevel !== 'all' && !GESTURES.some(g => g.level === learnLevel) ? `<p class="sub" style="margin:18px 0">Belum ada materi jenjang ${LEVEL_LABELS[learnLevel].toLowerCase()}. Admin bisa menambahkannya dari panel admin.</p>` : ''}
+
+            <div class="category-list" role="list">
+                ${CATS.filter(c => learnLevel === 'all' || byCatL(c[0]).length).map((c, idx) => {
+                    const list = byCatL(c[0]);
+                    const count = list.length;
+                    const done = list.filter(g => learned.has(g.id)).length;
+                    const pct = count ? Math.round((done / count) * 100) : 0;
+                    const sampleBadges = list.slice(0, 4).map(g => `<span class="cat-gesture-tag">${idw(g)}</span>`).join('');
+
+                    const emptyNote = count === 0
+                        ? `<span class="meta" style="color:var(--t3)">Materi segera hadir</span>`
+                        : '';
+
+                    return `
+                    <div class="cat-row" data-cat="${c[0]}" role="listitem" tabindex="0" aria-label="${c[1]} category, ${count} lessons">
+                        <div class="cat-row-num">${pad(idx + 1)}</div>
+                        <div class="cat-row-title">
+                            <h3>${c[1]}</h3>
+                            <span class="desc">${c[2]}</span>
+                        </div>
+                        <div class="cat-badges-preview">
+                            ${sampleBadges || emptyNote}
+                            ${count > 4 ? `<span class="cat-gesture-tag">+${count - 4} MORE</span>` : ''}
+                        </div>
+                        <div class="cat-progress-wrap">
+                            <div class="meta">${done}/${count} LESSONS</div>
+                            <div class="cat-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100">
+                                <b style="width: ${pct}%;"></b>
+                            </div>
+                            <div class="meta cy">${pct}% COMPLETE</div>
+                        </div>
+                        <div class="cat-arrow">→</div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
+        </section>
+        `;
+
+        $$('.cat-row').forEach(row => {
+            const go = () => { location.hash = '#/learn/' + row.dataset.cat; };
+            row.onclick = go;
+            row.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+        });
+    }
+
+    // Daftar Kata per Kategori (Tahap 2)
+    function renderCategoryWordList(cat) {
+        const list = byCatL(cat[0]);
+
+        // Keadaan kosong
+        if (!list.length) {
+            app.innerHTML = `
+            <section class="page wrap" aria-label="${cat[1]}">
+                <div class="lesson-top-bar">
+                    <a href="#/learn" class="lesson-back-btn"><span>←</span> BACK TO CURRICULUM</a>
+                    <div class="meta cy">${cat[1]}</div>
+                </div>
+                <div style="text-align:center;padding:80px 20px">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+                    <h2 style="margin:20px 0 8px">Materi segera hadir</h2>
+                    <p style="color:var(--t2)">Kategori ini belum memiliki materi yang terbit. Cek kembali nanti.</p>
+                    <a class="btn sm" href="#/learn" style="margin-top:24px;display:inline-block">← Kembali</a>
+                </div>
+            </section>`;
+            return;
+        }
+
+        const done = list.filter(g => learned.has(g.id)).length;
+        const pct  = Math.round((done / list.length) * 100);
+
+        app.innerHTML = `
+        <section class="page wrap" aria-label="${cat[1]} — daftar kata">
+            <div class="lesson-top-bar">
+                <a href="#/learn" class="lesson-back-btn"><span>←</span> BACK TO CURRICULUM</a>
+                <div class="meta cy">${cat[1]} — ${done}/${list.length} dipelajari</div>
+            </div>
+
+            <div class="page-header" style="padding-top:24px">
+                <h2 class="h2">${cat[1]}</h2>
+                <p class="sub">${cat[2]}</p>
+                <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:12px">
+                    <div class="cat-progress-bar" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100" style="width:180px">
+                        <b style="width:${pct}%"></b>
+                    </div>
+                    <span class="meta cy">${pct}% SELESAI</span>
+                    <a class="btn sm" href="#/practice/${cat[0]}" style="margin-left:auto">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                        Latihan kategori ini
+                    </a>
+                </div>
+            </div>
+
+            <ul class="word-list-grid" role="list" aria-label="Daftar kata ${cat[1]}">
+                ${list.map(g => {
+                    const isLearned = learned.has(g.id);
+                    return `
+                    <li role="listitem">
+                        <a class="word-list-item${isLearned ? ' is-learned' : ''}"
+                           href="#/learn/${cat[0]}/${g.id}"
+                           aria-label="${idw(g)}${isLearned ? ' — sudah dipelajari' : ''}">
+                            <span class="wli-check" aria-hidden="true">
+                                ${isLearned
+                                    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+                                    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>`
+                                }
+                            </span>
+                            <span class="wli-word">${idw(g)}</span>
+                            ${enw(g) ? `<span class="wli-en">${enw(g)}</span>` : ''}
+                            <span class="wli-diff pill">${diffLabel(g.diff)}</span>
+                            <span class="wli-arrow" aria-hidden="true">→</span>
+                        </a>
+                    </li>`;
+                }).join('')}
+            </ul>
+        </section>`;
+    }
+
+    // Flip Card Detail satu kata (Tahap 2)
+    function renderLessonCard(cat, current) {
+        const list   = byCatL(cat[0]);
+        const index  = list.findIndex(g => g.id === current.id);
+        const isDone = learned.has(current.id);
+        const prevG  = index > 0 ? list[index - 1] : null;
+        const nextG  = index < list.length - 1 ? list[index + 1] : null;
+
+        app.innerHTML = `
+        <section class="page wrap" aria-label="Interactive Lesson Flashcard">
+            <div class="lesson-top-bar">
+                <a href="#/learn/${cat[0]}" class="lesson-back-btn">
+                    <span>←</span> KEMBALI KE DAFTAR
+                </a>
+                <div class="meta cy">
+                    ${cat[1]} / KATA ${pad(index + 1)} DARI ${pad(list.length)}
+                </div>
+            </div>
+
+            <div class="flip-scene">
+                <div class="flip-card" id="lesson-flip-card" role="button" tabindex="0" aria-label="Kartu belajar ${idw(current)}. Tekan untuk membalik.">
+                    <!-- FRONT FACE -->
+                    <div class="flip-face flip-front">
+                        <div class="flip-header">
+                            <span class="meta">${cat[1]}</span>
+                            <span class="pill cyan">${diffLabel(current.diff)}</span>
+                        </div>
+                        <div class="sign-anim-box">
+                            ${getGestureSVG(current.vkey, current.w)}
+                        </div>
+                        <div class="sign-title-group">
+                            <div>
+                                <h2>${idw(current)}</h2>
+                                ${enw(current) ? `<div class="sign-id-trans">ENGLISH: ${enw(current)}</div>` : ''}
+                            </div>
+                            <div class="tap-reveal-hint">
+                                <span>TAP TO REVEAL</span>
+                                <span>↻</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BACK FACE (HOW TO SIGN) -->
+                    <div class="flip-face flip-back">
+                        <div class="flip-header">
+                            <span class="meta cy">HOW TO SIGN</span>
+                            <span class="pill cyan">KESULITAN: ${diffLabel(current.diff)}</span>
+                        </div>
+                        <div class="how-to-sign-grid">
+                            <div class="mini-svg-diagram">${getGestureSVG(current.vkey, current.w)}</div>
+                            <div>
+                                <h3 class="how-to-title">${idw(current)}</h3>
+                                <p style="color: var(--t2); font-size: 14px; margin: 0;">${current.desc}</p>
+                            </div>
+                        </div>
+                        <div class="lesson-steps-grid">
+                            <div class="lesson-step-block">
+                                <div class="meta cy">HAND POSITION</div>
+                                <p>${current.pos || 'Standard upright hand orientation.'}</p>
+                            </div>
+                            <div class="lesson-step-block">
+                                <div class="meta cy">MOVEMENT DIRECTION</div>
+                                <p>${current.mv || 'Smooth deliberate motion in neutral space.'}</p>
+                            </div>
+                            <div class="lesson-step-block">
+                                <div class="meta meta-warn">COMMON MISTAKE</div>
+                                <p>${current.mis || 'Failing to isolate finger movements cleanly.'}</p>
+                            </div>
+                            <div class="lesson-step-block">
+                                <div class="meta cy">CULTURAL STANDARD</div>
+                                <p>BISINDO Recognized Dialect Representation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Bar -->
+            <div class="lesson-controls">
+                <button class="btn" id="btn-prev-lesson" ${!prevG ? 'disabled' : ''} aria-label="Kata sebelumnya">SEBELUMNYA</button>
+                <button class="btn p" id="btn-mark-learned" aria-pressed="${isDone}">
+                    ${isDone ? 'SUDAH DIPELAJARI ✓' : 'TANDAI SUDAH DIPELAJARI'}
+                </button>
+                <button class="btn" id="btn-next-lesson" ${!nextG ? 'disabled' : ''} aria-label="Kata berikutnya">BERIKUTNYA</button>
+            </div>
+
+            <div class="lesson-controls" style="margin-top: 14px; gap: 12px;">
+                <a class="btn sm" href="#/practice/${cat[0]}" aria-label="Latihan semua kata di kategori ${cat[1]}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    LATIHAN KATEGORI INI
+                </a>
+                <a class="btn sm" href="#/practice/${current.id}" aria-label="Latihan gestur ${idw(current)} saja">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                    LATIHAN GESTUR INI
+                </a>
+            </div>
+        </section>
+        `;
+
+        const card = $('#lesson-flip-card');
+        const flipAction = () => {
+            card.classList.toggle('is-flipped');
+            playBeep('flip');
+        };
+        card.onclick  = flipAction;
+        card.onkeydown = e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipAction(); } };
+
+        const prevBtn = $('#btn-prev-lesson');
+        const nextBtn = $('#btn-next-lesson');
+        const markBtn = $('#btn-mark-learned');
+
+        if (prevBtn && prevG) prevBtn.onclick = () => { location.hash = `#/learn/${cat[0]}/${prevG.id}`; };
+        if (nextBtn && nextG) nextBtn.onclick = () => { location.hash = `#/learn/${cat[0]}/${nextG.id}`; };
+
+        markBtn.onclick = () => {
+            if (learned.has(current.id)) {
+                learned.delete(current.id);
+                markBtn.textContent = 'TANDAI SUDAH DIPELAJARI';
+                markBtn.setAttribute('aria-pressed', 'false');
+                toast(`${idw(current)} ditandai belum dipelajari`);
+            } else {
+                learned.add(current.id);
+                markBtn.innerHTML = 'SUDAH DIPELAJARI ✓';
+                markBtn.setAttribute('aria-pressed', 'true');
+                playBeep('success');
+                toast(`${idw(current)} ditandai sudah dipelajari`);
+            }
+            syncLearned(current.id, learned.has(current.id));
+            saveState();
+        };
+    }
+
 
         const totalLearned = learned.size;
         const totalSigns = GESTURES.length || 32;
@@ -2336,18 +2620,18 @@
 
     // Data contoh: hanya dipakai kalau server tidak bisa dihubungi. Bukan isi kamus yang sebenarnya.
     const FALLBACK_GESTURES = [
-            { id: 'hello', w: 'HELLO', id_word: 'HALO', c: 'greet', e: '👋', diff: 'Easy', desc: 'Raise open hand near forehead and move outward.', pos: 'Flat open hand, palm facing outward.', mv: 'Smooth outward arc away from forehead.', mis: 'Waving side-to-side casually.', vkey: 'open_palm_wave' },
-            { id: 'thank-you', w: 'THANK YOU', id_word: 'TERIMA KASIH', c: 'greet', e: '🙏', diff: 'Easy', desc: 'Touch fingertips to chin, then move forward.', pos: 'Flat hand facing inward at chin.', mv: 'Forward and slightly down toward the person.', mis: 'Starting too far from the chin.', vkey: 'chin_forward' },
-            { id: 'goodbye', w: 'GOODBYE', id_word: 'SELAMAT TINGGAL', c: 'greet', e: '🖐️', diff: 'Easy', desc: 'Raise open hand and fold fingers into palm.', pos: 'Open palm facing outward.', mv: 'Controlled finger fold cadence.', mis: 'Moving entire arm violently.', vkey: 'farewell_fold' },
-            { id: 'please', w: 'PLEASE', id_word: 'TOLONG', c: 'greet', e: '🤲', diff: 'Easy', desc: 'Flat palm against center of chest, circular motion.', pos: 'Flat palm on chest center.', mv: 'Clockwise circular rubbing.', mis: 'Hovering in air without touching chest.', vkey: 'chest_circle' },
-            { id: 'how-are-you', w: 'HOW ARE YOU', id_word: 'APA KABAR', c: 'conv', e: '💬', diff: 'Medium', desc: 'Roll curved hands open, then point forward.', pos: 'Both hands curved, roll open.', mv: 'Roll open and point to person.', mis: 'Omitting pointing at the end.', vkey: 'how_roll_point' },
-            { id: 'today', w: 'TODAY', id_word: 'HARI INI', c: 'conv', e: '☀️', diff: 'Medium', desc: 'Y-shape hands drop downward twice.', pos: 'Both hands forming Y-shape.', mv: 'Double short downward drop.', mis: 'Making movement too exaggerated.', vkey: 'y_drop_double' },
-            { id: 'yes', w: 'YES', id_word: 'YA', c: 'conv', e: '👍', diff: 'Easy', desc: 'Closed fist nods up and down from the wrist.', pos: 'Closed fist knuckles forward.', mv: 'Controlled wrist nod downward.', mis: 'Moving whole forearm.', vkey: 'fist_nod' },
-            { id: 'no', w: 'NO', id_word: 'TIDAK', c: 'conv', e: '🙅', diff: 'Easy', desc: 'Index and middle finger snap onto thumb.', pos: 'Two fingers extended parallel.', mv: 'Quick assertive pinch twice.', mis: 'Using only one finger.', vkey: 'finger_snap_no' },
-            { id: 'water', w: 'WATER', id_word: 'AIR', c: 'needs', e: '💧', diff: 'Easy', desc: 'W-hand taps chin twice.', pos: 'Three middle fingers upright (W).', mv: 'Two light chin taps.', mis: 'Showing two fingers instead of three.', vkey: 'w_chin_tap' },
-            { id: 'eat', w: 'EAT', id_word: 'MAKAN', c: 'needs', e: '🍽️', diff: 'Easy', desc: 'Clustered fingertips tap mouth.', pos: 'Fingertips together touching thumb.', mv: 'Gentle repeated tap to lips.', mis: 'Opening palm while tapping.', vkey: 'cluster_mouth_tap' },
-            { id: 'help', w: 'HELP', id_word: 'TOLONG', c: 'emerg', e: '🆘', diff: 'Easy', desc: 'Thumbs-up fist on flat palm, lift upward.', pos: 'Fist on flat horizontal palm.', mv: 'Firm supportive upward lift.', mis: 'Leaving supporting palm behind.', vkey: 'palm_fist_lift' },
-            { id: 'stop', w: 'STOP', id_word: 'BERHENTI', c: 'emerg', e: '🛑', diff: 'Easy', desc: 'Chop flat blade of hand down into other palm.', pos: 'Vertical flat blade into horizontal palm.', mv: 'Decisive instant halt chop.', mis: 'Chopping too loosely.', vkey: 'blade_chop_stop' }
+            { id: 'hello',     w: 'HELLO',     id_word: 'HALO',          c: 'greet', level: 'kata',    e: '👋', diff: 'Easy',   desc: 'Raise open hand near forehead and move outward.',      pos: 'Flat open hand, palm facing outward.',     mv: 'Smooth outward arc away from forehead.',        mis: 'Waving side-to-side casually.',        vkey: 'open_palm_wave' },
+            { id: 'thank-you', w: 'THANK YOU', id_word: 'TERIMA KASIH',  c: 'greet', level: 'kata',    e: '🙏', diff: 'Easy',   desc: 'Touch fingertips to chin, then move forward.',         pos: 'Flat hand facing inward at chin.',         mv: 'Forward and slightly down toward the person.',  mis: 'Starting too far from the chin.',      vkey: 'chin_forward' },
+            { id: 'goodbye',   w: 'GOODBYE',   id_word: 'SELAMAT TINGGAL', c: 'greet', level: 'kata', e: '🖐️', diff: 'Easy',   desc: 'Raise open hand and fold fingers into palm.',          pos: 'Open palm facing outward.',               mv: 'Controlled finger fold cadence.',               mis: 'Moving entire arm violently.',         vkey: 'farewell_fold' },
+            { id: 'please',    w: 'PLEASE',    id_word: 'TOLONG / SILAKAN', c: 'greet', level: 'kata', e: '🤲', diff: 'Easy', desc: 'Flat palm against center of chest, circular motion.',  pos: 'Flat palm on chest center.',              mv: 'Clockwise circular rubbing.',                   mis: 'Hovering in air without touching chest.', vkey: 'chest_circle' },
+            { id: 'help',      w: 'HELP',      id_word: 'TOLONG',        c: 'greet', level: 'kata',    e: '🆘', diff: 'Easy',   desc: 'Thumbs-up fist on flat palm, lift upward.',            pos: 'Fist on flat horizontal palm.',           mv: 'Firm supportive upward lift.',                  mis: 'Leaving supporting palm behind.',      vkey: 'palm_fist_lift' },
+            { id: 'how-are-you', w: 'HOW ARE YOU', id_word: 'APA KABAR', c: 'conv', level: 'kalimat', e: '💬', diff: 'Medium', desc: 'Roll curved hands open, then point forward.',          pos: 'Both hands curved, roll open.',           mv: 'Roll open and point to person.',                mis: 'Omitting pointing at the end.',        vkey: 'how_roll_point' },
+            { id: 'today',     w: 'TODAY',     id_word: 'HARI INI',      c: 'conv',  level: 'kata',    e: '☀️', diff: 'Medium', desc: 'Y-shape hands drop downward twice.',                    pos: 'Both hands forming Y-shape.',             mv: 'Double short downward drop.',                   mis: 'Making movement too exaggerated.',     vkey: 'y_drop_double' },
+            { id: 'yes',       w: 'YES',       id_word: 'YA',            c: 'conv',  level: 'kata',    e: '👍', diff: 'Easy',   desc: 'Closed fist nods up and down from the wrist.',         pos: 'Closed fist knuckles forward.',           mv: 'Controlled wrist nod downward.',                mis: 'Moving whole forearm.',               vkey: 'fist_nod' },
+            { id: 'no',        w: 'NO',        id_word: 'TIDAK',         c: 'conv',  level: 'kata',    e: '🙅', diff: 'Easy',   desc: 'Index and middle finger snap onto thumb.',             pos: 'Two fingers extended parallel.',          mv: 'Quick assertive pinch twice.',                  mis: 'Using only one finger.',              vkey: 'finger_snap_no' },
+            { id: 'eat',       w: 'EAT',       id_word: 'MAKAN',         c: 'verbs', level: 'kata',    e: '🍽️', diff: 'Easy',  desc: 'Clustered fingertips tap mouth.',                       pos: 'Fingertips together touching thumb.',      mv: 'Gentle repeated tap to lips.',                  mis: 'Opening palm while tapping.',         vkey: 'cluster_mouth_tap' },
+            { id: 'sleep',     w: 'SLEEP',     id_word: 'TIDUR',         c: 'verbs', level: 'kata',    e: '😴', diff: 'Easy',   desc: 'Pull hand down closing fingers near face.',            pos: 'Open palm at eye level.',                 mv: 'Close fingers while pulling down.',             mis: 'Pulling without closing fingers.',    vkey: 'face_descend_close' },
+            { id: 'one',       w: 'ONE',       id_word: 'SATU',          c: 'num',   level: 'angka',   e: '1️⃣', diff: 'Easy',  desc: 'Index finger pointing straight up.',                   pos: 'Index up, thumb locks other fingers.',    mv: 'Hold steady in neutral space.',                 mis: 'Showing thumb instead of index.',     vkey: 'digit_one' }
     ];
 
     const pageName = () => (location.hash || '#/').slice(2).split('/')[0];
