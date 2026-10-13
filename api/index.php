@@ -26,10 +26,11 @@ putenv('APP_CONFIG_CACHE=/tmp/bootstrap/cache/config.php');
 putenv('APP_SERVICES_CACHE=/tmp/bootstrap/cache/services.php');
 putenv('APP_PACKAGES_CACHE=/tmp/bootstrap/cache/packages.php');
 putenv('APP_ROUTES_CACHE=/tmp/bootstrap/cache/routes.php');
+$app->useStoragePath('/tmp/storage');
 
 // 3. Load Autoload & Inisialisasi App
-require __DIR__.'/../vendor/autoload.php';
-$app = require_once __DIR__.'/../bootstrap/app.php';
+require __DIR__ . '/../vendor/autoload.php';
+$app = require_once __DIR__ . '/../bootstrap/app.php';
 
 // 4. Set storage path pada instance Laravel
 $app->useStoragePath('/tmp/storage');
@@ -46,7 +47,7 @@ if (empty($_SERVER['PATH_INFO']) && ! empty($_SERVER['REQUEST_URI'])) {
     if (str_starts_with($path, '/api/index.php')) {
         $path = substr($path, strlen('/api/index.php')) ?: '/';
     }
-    $request->server->set('REQUEST_URI', $path.(isset($uriParts[1]) ? '?'.$uriParts[1] : ''));
+    $request->server->set('REQUEST_URI', $path . (isset($uriParts[1]) ? '?' . $uriParts[1] : ''));
     $request = Request::createFromBase($request);
 }
 
