@@ -1,0 +1,23 @@
+FROM dunglas/frankenphp:1-php8.4-bookworm AS runtime
+
+RUN install-php-extensions intl zip bcmath pdo_pgsql pdo_sqlite pdo_mysql
+
+WORKDIR /app
+
+COPY . .
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN composer install --no-dev --no-interaction --optimize-autoloader --ignore-platform-reqs
+
+COPY Caddyfile /etc/frankenphp/Caddyfile
+
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+ENV LOG_CHANNEL=stderr
+ENV VIEW_COMPILED_PATH=/tmp/views
+
+RUN mkdir -p /tmp/views && chown -R www-data:www-data /tmp/views
+
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
