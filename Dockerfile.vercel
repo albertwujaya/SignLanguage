@@ -10,23 +10,26 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --no-interaction --optimize-autoloader --ignore-platform-reqs
 
 COPY Caddyfile /etc/frankenphp/Caddyfile
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-# Ensure sqlite database exists and has write permissions
-RUN touch /app/database/database.sqlite \
-    && chown -R www-data:www-data /app/storage /app/bootstrap/cache /app/database \
-    && chmod -R 775 /app/storage /app/bootstrap/cache /app/database
+# Ensure storage, cache, and database exist with correct permissions
+RUN mkdir -p /app/database /app/storage /app/bootstrap/cache /tmp/views \
+    && touch /app/database/database.sqlite \
+    && chown -R www-data:www-data /app/storage /app/bootstrap/cache /app/database /tmp/views \
+    && chmod -R 775 /app/storage /app/bootstrap/cache /app/database /tmp/views
 
 ENV APP_NAME=Signesia
 ENV APP_ENV=production
 ENV APP_KEY=base64:xx4dZCavzneG2P+eQyQW63QjbQ/YK1HsoiS/3KyLjDU=
-ENV APP_DEBUG=true
+ENV APP_DEBUG=false
 ENV LOG_CHANNEL=stderr
 ENV DB_CONNECTION=sqlite
 ENV DB_DATABASE=/app/database/database.sqlite
 ENV SESSION_DRIVER=cookie
 ENV CACHE_STORE=array
 ENV VIEW_COMPILED_PATH=/tmp/views
+ENV ADMIN_EMAIL=admin@email.com
+ENV ADMIN_PASSWORD=admin1234567
 
-RUN mkdir -p /tmp/views && chown -R www-data:www-data /tmp/views && chmod -R 777 /tmp/views
-
-CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+ENTRYPOINT ["docker-entrypoint.sh"]
