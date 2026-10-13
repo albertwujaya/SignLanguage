@@ -11,13 +11,22 @@ RUN composer install --no-dev --no-interaction --optimize-autoloader --ignore-pl
 
 COPY Caddyfile /etc/frankenphp/Caddyfile
 
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+# Ensure sqlite database exists and has write permissions
+RUN touch /app/database/database.sqlite \
+    && chown -R www-data:www-data /app/storage /app/bootstrap/cache /app/database \
+    && chmod -R 775 /app/storage /app/bootstrap/cache /app/database
 
+ENV APP_NAME=Signesia
 ENV APP_ENV=production
-ENV APP_DEBUG=false
+ENV APP_KEY=base64:xx4dZCavzneG2P+eQyQW63QjbQ/YK1HsoiS/3KyLjDU=
+ENV APP_DEBUG=true
 ENV LOG_CHANNEL=stderr
+ENV DB_CONNECTION=sqlite
+ENV DB_DATABASE=/app/database/database.sqlite
+ENV SESSION_DRIVER=cookie
+ENV CACHE_STORE=array
 ENV VIEW_COMPILED_PATH=/tmp/views
 
-RUN mkdir -p /tmp/views && chown -R www-data:www-data /tmp/views
+RUN mkdir -p /tmp/views && chown -R www-data:www-data /tmp/views && chmod -R 777 /tmp/views
 
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
