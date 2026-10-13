@@ -1,20 +1,19 @@
 {
   "version": 2,
   "framework": null,
-  "outputDirectory": ".",
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.9.0"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(build|css|js|images|fonts|models|favicon.ico|robots.txt)(.*)",
-      "dest": "/public/$1$2"
+      "source": "/(build|css|js|images|fonts|models|favicon.ico|robots.txt)(.*)",
+      "destination": "/public/$1$2"
     },
     {
-      "src": "/(.*)",
-      "dest": "/api/index.php"
+      "source": "/(.*)",
+      "destination": "/api/index.php"
     }
   ],
   "env": {
