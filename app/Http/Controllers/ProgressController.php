@@ -80,7 +80,7 @@ class ProgressController extends Controller
 
         $request->user()->forceFill(['last_active_at' => now()])->saveQuietly();
 
-        // Safe attempt logging (Tahap 4c)
+        // Safe attempt logging & progress marking
         if (! empty($data['attempts'])) {
             try {
                 foreach ($data['attempts'] as $item) {
@@ -95,10 +95,39 @@ class ProgressController extends Controller
                             'gesture_id' => $gestureId,
                             'is_correct' => (bool) $item['is_correct'],
                         ]);
+
+                        if (! empty($item['is_correct'])) {
+                            GestureProgress::updateOrCreate(
+                                ['user_id' => $request->user()->id, 'gesture_id' => $gestureId],
+                                ['learned_at' => now()],
+                            );
+                        }
                     }
                 }
             } catch (Throwable) {
                 // Jangan menggagalkan respon Practice jika pencatatan attempt gagal
+            }
+        } elseif (! empty($data['level']) && $data['correct'] > 0) {
+            try {
+                $gestures = Gesture::published()
+                    ->where('level', $data['level'])
+                    ->orderBy('sort_order')
+                    ->take($data['correct'])
+                    ->get();
+
+                foreach ($gestures as $gesture) {
+                    PracticeAttempt::create([
+                        'user_id' => $request->user()->id,
+                        'gesture_id' => $gesture->id,
+                        'is_correct' => true,
+                    ]);
+
+                    GestureProgress::updateOrCreate(
+                        ['user_id' => $request->user()->id, 'gesture_id' => $gesture->id],
+                        ['learned_at' => now()],
+                    );
+                }
+            } catch (Throwable) {
             }
         }
 

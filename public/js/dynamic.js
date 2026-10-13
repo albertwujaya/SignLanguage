@@ -91,7 +91,10 @@
         },
         setModel(m) { model = m; api.ready = true; },
         reset() { frames = []; },
-        push(res) { frames.push(frameFeatures(res)); },
+        push(res) {
+            frames.push(frameFeatures(res));
+            if (frames.length > 30) frames.shift();
+        },
         predict() {
             if (!model) return null;
             const f = clipFeatures(frames);

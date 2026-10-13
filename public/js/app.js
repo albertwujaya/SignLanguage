@@ -142,12 +142,13 @@
             .catch(() => toast('Progres belum tersimpan ke akun. Coba lagi.'));
     }
 
-    function saveSession(correct, total, seconds, level = null) {
+    function saveSession(correct, total, seconds, level = null, attempts = []) {
         if (!AUTH.loggedIn) return;
         const payload = { total, correct, duration_seconds: seconds };
         if (level) payload.level = level;
+        if (attempts && attempts.length) payload.attempts = attempts;
         apiRequest(AUTH.sessionUrl, 'POST', payload)
-            .then(() => toast('Sesi latihan tersimpan di akunmu'))
+            .then(() => toast('Sesi latihan dan progres tersimpan di akunmu'))
             .catch(() => toast('Sesi latihan belum tersimpan. Coba lagi.'));
     }
 
@@ -378,15 +379,22 @@
     window.latestRealGesture = null;
 
     // Heuristic Gesture Classifier based on 21 MediaPipe Hand Landmarks
-    function classifyHandLandmarks(landmarks) {
+    function classifyHandLandmarks(landmarks, secondHand = null) {
         if (!landmarks || landmarks.length < 21) return null;
 
         // Landmarks: 0=wrist, 4=thumb_tip, 8=index_tip, 12=middle_tip, 16=ring_tip, 20=pinky_tip
         // PIPs: 2=thumb_mcp, 6=index_pip, 10=middle_pip, 14=ring_pip, 18=pinky_pip
-        const indexUp = landmarks[8].y < landmarks[6].y;
-        const middleUp = landmarks[12].y < landmarks[10].y;
-        const ringUp = landmarks[16].y < landmarks[14].y;
-        const pinkyUp = landmarks[20].y < landmarks[18].y;
+        const wrist = landmarks[0];
+        const isExtended = (tipIdx, pipIdx) => {
+            const dTip = Math.hypot(landmarks[tipIdx].x - wrist.x, landmarks[tipIdx].y - wrist.y);
+            const dPip = Math.hypot(landmarks[pipIdx].x - wrist.x, landmarks[pipIdx].y - wrist.y);
+            return dTip > dPip * 1.15;
+        };
+
+        const indexUp = isExtended(8, 6);
+        const middleUp = isExtended(12, 10);
+        const ringUp = isExtended(16, 14);
+        const pinkyUp = isExtended(20, 18);
 
         const distThumbPinky = Math.hypot(landmarks[4].x - landmarks[17].x, landmarks[4].y - landmarks[17].y);
         const distThumbBase = Math.hypot(landmarks[2].x - landmarks[17].x, landmarks[2].y - landmarks[17].y);
@@ -394,45 +402,87 @@
 
         const thumbUpward = landmarks[4].y < landmarks[3].y && landmarks[3].y < landmarks[2].y;
         const indexThumbDist = Math.hypot(landmarks[4].x - landmarks[8].x, landmarks[4].y - landmarks[8].y);
+        const middleThumbDist = Math.hypot(landmarks[4].x - landmarks[12].x, landmarks[4].y - landmarks[12].y);
+        const indexMiddleDist = Math.hypot(landmarks[8].x - landmarks[12].x, landmarks[8].y - landmarks[12].y);
 
-        const fingerCount = (indexUp ? 1 : 0) + (middleUp ? 1 : 0) + (ringUp ? 1 : 0) + (pinkyUp ? 1 : 0) + (thumbOut ? 1 : 0);
+        // 1. Dua tangan bertemu / salam / terima kasih (🙏)
+        if (secondHand && secondHand.length >= 21) {
+            const distWrists = Math.hypot(wrist.x - secondHand[0].x, wrist.y - secondHand[0].y);
+            if (distWrists < 0.28) {
+                return { id: 'thank-you', w: 'THANK YOU', id_word: 'TERIMA KASIH', e: '🙏', conf: 96 };
+            }
+        }
 
-        // Gesture rules
-        if (indexThumbDist < 0.07 && middleUp && ringUp) {
-            return { id: 'good', w: 'OK / GOOD', e: '👌', conf: 97 };
+        // 2. HALO (👋) — Telapak tangan terbuka 5 jari mengarah ke kamera dengan jari terbuka renggang
+        if (indexUp && middleUp && ringUp && pinkyUp && thumbOut && indexMiddleDist > 0.032) {
+            return { id: 'hello', w: 'HELLO', id_word: 'HALO', e: '👋', conf: 94 };
         }
-        if (indexUp && middleUp && ringUp && pinkyUp && thumbOut) {
-            return { id: 'hello', w: 'HELLO', e: '👋', conf: 98 };
+
+        // 3. BERHENTI (✋) — Telapak tangan terbuka 5 jari rapat menghadap ke depan
+        if (indexUp && middleUp && ringUp && pinkyUp && indexMiddleDist <= 0.032) {
+            return { id: 'stop', w: 'STOP', id_word: 'BERHENTI', e: '✋', conf: 94 };
         }
-        if (indexUp && middleUp && ringUp && pinkyUp && !thumbOut) {
-            return { id: 'four', w: 'FOUR', e: '4️⃣', conf: 94 };
+
+        // 4. BAGUS / BAIK (👌) — OK Gesture (jempol & telunjuk bersentuhan, 3 jari lain naik)
+        if (indexThumbDist < 0.075 && middleUp && ringUp) {
+            return { id: 'good', w: 'GOOD', id_word: 'BAGUS / BAIK', e: '👌', conf: 97 };
         }
-        if (indexUp && middleUp && ringUp && !pinkyUp) {
-            return { id: 'three', w: 'THREE', e: '3️⃣', conf: 93 };
-        }
-        if (indexUp && middleUp && !ringUp && !pinkyUp) {
-            return { id: 'how-are-you', w: 'PEACE / TWO', e: '✌️', conf: 96 };
-        }
-        if (indexUp && !middleUp && !ringUp && !pinkyUp) {
-            return { id: 'today', w: 'ONE / POINT', e: '☝️', conf: 95 };
-        }
-        if (thumbOut && pinkyUp && !indexUp && !middleUp && !ringUp) {
-            return { id: 'help', w: 'CALL ME', e: '🤙', conf: 93 };
-        }
-        if (indexUp && pinkyUp && !middleUp && !ringUp) {
-            return { id: 'love', w: 'LOVE / ILY', e: '🤟', conf: 95 };
-        }
+
+        // 5. TERIMA KASIH / JEMPOL (👍) — Jempol ke atas, jari lain menggenggam
         if (thumbUpward && !indexUp && !middleUp && !ringUp && !pinkyUp) {
-            return { id: 'thank-you', w: 'THUMBS UP', e: '👍', conf: 97 };
-        }
-        if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbOut) {
-            return { id: 'yes', w: 'FIST / YES', e: '✊', conf: 92 };
+            return { id: 'thank-you', w: 'THANK YOU', id_word: 'TERIMA KASIH', e: '👍', conf: 96 };
         }
 
-        return { id: 'custom', w: `${fingerCount} FINGERS`, e: '✋', conf: 89 };
+        // 6. TOLONG (🤙) — Shaka / Call me sign (jempol & kelingking terbuka, jari tengah menutup)
+        if (thumbOut && pinkyUp && !indexUp && !middleUp && !ringUp) {
+            return { id: 'help', w: 'HELP', id_word: 'TOLONG', e: '🤙', conf: 94 };
+        }
+
+        // 7. SENANG BERTEMU DENGANMU / CINTA (🤟) — ILY sign (jempol, telunjuk, kelingking naik)
+        if (indexUp && pinkyUp && thumbOut && !middleUp && !ringUp) {
+            return { id: 'nice-to-meet-you', w: 'NICE TO MEET YOU', id_word: 'SENANG BERTEMU DENGANMU', e: '🤟', conf: 95 };
+        }
+
+        // 8. APA KABAR / DUA (✌️) — Peace / V sign
+        if (indexUp && middleUp && !ringUp && !pinkyUp && !thumbOut && indexMiddleDist > 0.04) {
+            return { id: 'how-are-you', w: 'HOW ARE YOU', id_word: 'APA KABAR', e: '✌️', conf: 96 };
+        }
+
+        // 9. AIR (💧) — W sign (3 jari tengah berdiri: telunjuk, tengah, manis)
+        if (indexUp && middleUp && ringUp && !pinkyUp && !thumbOut) {
+            return { id: 'water', w: 'WATER', id_word: 'AIR', e: '💧', conf: 94 };
+        }
+
+        // 10. HARI INI (☝️) — Satu jari telunjuk menunjuk
+        if (indexUp && !middleUp && !ringUp && !pinkyUp && !thumbOut) {
+            return { id: 'today', w: 'TODAY', id_word: 'HARI INI', e: '☝️', conf: 93 };
+        }
+
+        // 11. YA (✊) — Kepalan tangan (semua jari menggenggam)
+        if (!indexUp && !middleUp && !ringUp && !pinkyUp && !thumbOut) {
+            return { id: 'yes', w: 'YES', id_word: 'YA', e: '✊', conf: 90 };
+        }
+
+        // 12. MAKAN (🍽️) — Jari-jari menguncup di dekat wajah/mulut
+        if (indexThumbDist < 0.065 && middleThumbDist < 0.065 && !pinkyUp) {
+            return { id: 'eat', w: 'EAT', id_word: 'MAKAN', e: '🍽️', conf: 92 };
+        }
+
+        // 13. MINUM (🥤) — Tangan melengkung seperti cangkir (C-shape)
+        if (thumbOut && !indexUp && landmarks[4].y > landmarks[8].y && indexThumbDist > 0.07 && indexThumbDist < 0.2) {
+            return { id: 'drink', w: 'DRINK', id_word: 'MINUM', e: '🥤', conf: 91 };
+        }
+
+        // 14. TIDUR (😴) — Telapak tangan horizontal miring
+        const isHorizontal = Math.abs(landmarks[0].y - landmarks[9].y) < Math.abs(landmarks[0].x - landmarks[9].x);
+        if (isHorizontal && indexUp && middleUp && ringUp) {
+            return { id: 'sleep', w: 'SLEEP', id_word: 'TIDUR', e: '😴', conf: 92 };
+        }
+
+        return null;
     }
 
-        // =========================================================================
+    // =========================================================================
     // MODEL HURUF (MediaPipe Tasks Vision + MLP, semua jalan di browser)
     // =========================================================================
     const MODEL_BASE = window.MODEL_BASE || '/models';
@@ -450,7 +500,25 @@
     const NUM = { ready: false, model: null, loading: null };
     const NUMBER_WORDS = { ONE: '1', TWO: '2', THREE: '3', FOUR: '4', FIVE: '5', SIX: '6', SEVEN: '7', EIGHT: '8', NINE: '9', TEN: '10' };
     const numberOf = g => (g && g.level === 'angka') ? (NUMBER_WORDS[((g.w || '').trim().toUpperCase())] || '') : '';
-    window.recogMode = 'huruf'; // 'huruf' atau 'angka'. Pose 2 dan V sama persis, jadi harus dipilih
+
+    // Model gerakan dinamis (kata-kata: hello, thank-you, eat, drink, study, come, dsb.)
+    const DYN = { ready: false, loading: null };
+    function loadDynamicModel() {
+        if (DYN.loading) return DYN.loading;
+        if (typeof DynamicGesture !== 'undefined' && DynamicGesture.ready) {
+            DYN.ready = true;
+            return Promise.resolve(true);
+        }
+        if (typeof DynamicGesture !== 'undefined') {
+            DYN.loading = DynamicGesture.load(`${MODEL_BASE}/dynamic_model.json`)
+                .then(ok => { DYN.ready = ok; return ok; })
+                .catch(e => { console.warn('Model kata dinamis belum tersedia:', e); DYN.loading = null; return false; });
+            return DYN.loading;
+        }
+        return Promise.resolve(false);
+    }
+
+    window.recogMode = 'kata'; // 'kata' (default Translate), 'huruf' (abjad), atau 'angka'
 
     function loadNumberModel() {
         if (NUM.loading) return NUM.loading;
@@ -541,7 +609,7 @@
     async function startRealTracking(containerEl, videoEl) {
         const lm = await loadHandLandmarker();
         if (!lm) return false;
-        await Promise.all([loadLetterModel(), loadNumberModel()]);
+        await Promise.all([loadLetterModel(), loadNumberModel(), loadDynamicModel()]);
         if (!cameraStream) return true;
 
         let canvas = containerEl.querySelector('.cam-landmark-canvas');
@@ -566,7 +634,7 @@
             ctx.clearRect(0, 0, w, h);
             const label = $('#trans-detected-label');
 
-                        if (res.landmarks && res.landmarks.length) {
+            if (res.landmarks && res.landmarks.length) {
                 res.landmarks.forEach(lms => {
                     ctx.strokeStyle = 'rgba(0, 78, 47, 0.85)';
                     ctx.lineWidth = 3;
@@ -597,12 +665,40 @@
                     const ps = recent.filter(r => r.letter === top).map(r => r.p);
                     const conf = Math.round((ps.reduce((s, v) => s + v, 0) / ps.length) * 100);
                     const card = useNum ? GESTURES.find(g => numberOf(g) === top) : GESTURES.find(g => g.level === 'abjad' && letterOf(g) === top);
-                    window.latestRealGesture = { id: card ? card.id : top.toLowerCase(), w: top, letter: top, e: '', conf };
+                    window.latestRealGesture = { id: card ? card.id : top.toLowerCase(), w: top, letter: top, id_word: card ? idw(card) : top, e: card ? card.e : '', conf };
                 } else {
-                    window.latestRealGesture = classifyHandLandmarks(res.landmarks[0]);
+                    // MODE: KATA (SEMUA KATA)
+                    if (window.DynamicGesture && window.DynamicGesture.ready) {
+                        window.DynamicGesture.push(res);
+                    }
+
+                    // 1. Cek heuristik bentuk tangan (mis. Halo, Berhenti, Bagus, Terima Kasih, dsb.)
+                    let detected = classifyHandLandmarks(res.landmarks[0], res.landmarks.length > 1 ? res.landmarks[1] : null);
+
+                    // 2. Jika tidak ada bentuk ikonik statis, cek model neural network dinamis
+                    if (!detected && window.DynamicGesture && window.DynamicGesture.ready) {
+                        const dyn = window.DynamicGesture.predict();
+                        if (dyn && dyn.p >= 0.65) {
+                            const card = GESTURES.find(g => g.id === dyn.label || g.slug === dyn.label || ((g.w || '').toLowerCase() === dyn.label.toLowerCase()));
+                            if (card) {
+                                detected = {
+                                    id: card.id,
+                                    w: card.w,
+                                    id_word: idw(card),
+                                    e: card.e || '💬',
+                                    conf: Math.round(dyn.p * 100)
+                                };
+                            }
+                        }
+                    }
+
+                    window.latestRealGesture = detected;
                 }
                 const g = window.latestRealGesture;
-                if (label && g) label.textContent = `${g.letter || idwById(g.id, g.w)} (${g.conf}% KEYAKINAN)`;
+                if (label && g) {
+                    const text = g.id_word || idwById(g.id, g.w) || g.letter || g.w;
+                    label.textContent = `${text} (${g.conf}% KEYAKINAN)`;
+                }
             } else {
                 recent.length = 0;
                 window.latestRealGesture = null;
@@ -614,16 +710,30 @@
     }
 
     async function initCamera(containerEl) {
+        if (!containerEl) return false;
+        containerEl.querySelectorAll('.cam-error-overlay').forEach(v => v.remove());
         try {
             // Stream yang masih hidup dipakai ulang (mis. pindah langkah Practice).
             // Yang harus dibuat ulang hanya elemen <video> di viewport yang baru.
             const alive = cameraStream && cameraStream.getTracks().some(t => t.readyState === 'live');
             if (!alive) {
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
-                });
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('BROWSER_UNSUPPORTED');
+                }
+                try {
+                    cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+                    });
+                } catch (constraintErr) {
+                    if (constraintErr.name === 'NotAllowedError' || constraintErr.name === 'PermissionDeniedError') {
+                        throw constraintErr;
+                    }
+                    console.warn('Constraint kamera ideal gagal, mencoba fallback { video: true }...', constraintErr);
+                    cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                }
             }
             containerEl.querySelectorAll('video').forEach(v => v.remove());
+            containerEl.querySelectorAll('.cam-error-overlay').forEach(v => v.remove());
             if (landmarkAnimId) { cancelAnimationFrame(landmarkAnimId); landmarkAnimId = null; }
             const video = document.createElement('video');
             video.autoplay = true;
@@ -632,13 +742,83 @@
             video.setAttribute('aria-label', 'Live webcam feed for gesture detection');
             video.srcObject = cameraStream;
             containerEl.prepend(video);
-            video.play().catch(() => {});
+            await video.play().catch(() => {});
+
+            const simBadge = containerEl.querySelector('#btn-toggle-sim');
+            if (simBadge) {
+                simBadge.textContent = 'MODE: KAMERA AKTIF';
+                simBadge.style.background = '';
+                simBadge.style.color = '';
+            }
 
             startLandmarkTracking(containerEl, video);
             return true;
         } catch (e) {
-            toast('Webcam unavailable. Operating in AI Vision Simulation mode.');
-            startLandmarkTracking(containerEl, null, true);
+            console.error('initCamera gagal:', e);
+            containerEl.querySelectorAll('video').forEach(v => v.remove());
+
+            let errorTitle = 'Kamera Tidak Dapat Dibuka';
+            let errorDesc = 'Terjadi kendala saat mengakses webcam.';
+
+            if (e.message === 'BROWSER_UNSUPPORTED' || !navigator.mediaDevices) {
+                errorTitle = 'Browser Tidak Mengizinkan Kamera';
+                errorDesc = 'Akses kamera tidak diizinkan di URL ini. Pastikan membuka via http://127.0.0.1:8000 atau https.';
+            } else if (e.name === 'NotReadableError' || e.name === 'TrackStartError') {
+                errorTitle = 'Kamera Sedang Digunakan Aplikasi Lain';
+                errorDesc = 'Webcam sedang dipakai oleh aplikasi lain (seperti tab <b>Google Meet</b>, Zoom, atau aplikasi Kamera Windows). Silakan matikan kamera di Google Meet/aplikasi tersebut, lalu coba lagi.';
+            } else if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+                errorTitle = 'Izin Kamera Diblokir Browser';
+                errorDesc = 'Izin webcam belum diberikan. Klik ikon <b>Gembok / Setelan Situs</b> di samping address bar Chrome (127.0.0.1:8000), pilih <b>Izinkan (Allow) Kamera</b>, lalu klik Coba Lagi.';
+            } else if (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError') {
+                errorTitle = 'Kamera / Webcam Tidak Ditemukan';
+                errorDesc = 'Perangkat webcam tidak terdeteksi di laptop/PC ini. Pastikan kamera terpasang dan aktif.';
+            }
+
+            toast(errorTitle);
+
+            const simBadge = containerEl.querySelector('#btn-toggle-sim');
+            if (simBadge) {
+                simBadge.textContent = 'MODE: KAMERA ERROR';
+                simBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+                simBadge.style.color = '#b91c1c';
+            }
+
+            containerEl.querySelectorAll('.cam-error-overlay').forEach(v => v.remove());
+            const errorOverlay = document.createElement('div');
+            errorOverlay.className = 'cam-error-overlay';
+            errorOverlay.style.cssText = 'position:absolute;inset:0;background:rgba(253,248,240,0.96);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--ink);border-radius:10px;';
+            errorOverlay.innerHTML = `
+                <div style="font-size:36px;margin-bottom:8px">📷⚠️</div>
+                <h3 style="font-size:17px;font-weight:700;margin:0 0 8px;color:#c0392b">${escapeHtml(errorTitle)}</h3>
+                <p style="font-size:13px;line-height:1.5;max-width:380px;margin:0 0 16px;color:var(--t2);">${errorDesc}</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+                    <button class="btn p" id="btn-cam-retry" style="font-size:12px;padding:8px 16px;">🔄 COBA BUKA KAMERA LAGI</button>
+                    <button class="btn" id="btn-cam-usesim" style="font-size:12px;padding:8px 14px;">GUNAKAN MODE SIMULASI</button>
+                </div>
+            `;
+            containerEl.appendChild(errorOverlay);
+
+            const retryBtn = errorOverlay.querySelector('#btn-cam-retry');
+            if (retryBtn) {
+                retryBtn.onclick = () => {
+                    errorOverlay.remove();
+                    initCamera(containerEl);
+                };
+            }
+            const simBtn = errorOverlay.querySelector('#btn-cam-usesim');
+            if (simBtn) {
+                simBtn.onclick = () => {
+                    errorOverlay.remove();
+                    if (simBadge) {
+                        simBadge.textContent = 'MODE: SIMULASI AKTIF';
+                        simBadge.style.background = '#e0f2fe';
+                        simBadge.style.color = '#0369a1';
+                    }
+                    startLandmarkTracking(containerEl, null, true);
+                    toast('Mode simulasi aktif.');
+                };
+            }
+
             return false;
         }
     }
@@ -1548,7 +1728,11 @@
                 if (!sessionSaved) {
                     sessionSaved = true;
                     const sessionLevel = (sessionItems[0] && sessionItems[0].level) || 'kata';
-                    saveSession(passedCount, sessionLength, totalSeconds, sessionLevel);
+                    const attempts = sessionItems.map((item, idx) => ({
+                        slug: item.id,
+                        is_correct: !!sessionResults[idx]
+                    }));
+                    saveSession(passedCount, sessionLength, totalSeconds, sessionLevel, attempts);
                 }
 
                 container.innerHTML = `
@@ -1693,19 +1877,24 @@
                     if (holdCount < 4) return;
                     pass = true;
                 } else if (!forcePass && window.latestRealGesture) {
-                    const matchesWord = (window.latestRealGesture.id === currentSign.id || (currentSign.w && window.latestRealGesture.w && window.latestRealGesture.w.includes(currentSign.w)));
+                    const g = window.latestRealGesture;
+                    const matchesWord = (g.id === currentSign.id || 
+                        (currentSign.slug && g.id === currentSign.slug) ||
+                        (currentSign.w && g.w && g.w.toLowerCase() === currentSign.w.toLowerCase()));
                     if (!matchesWord) {
                         holdCount = 0;
-                        detectedWord.textContent = idwById(window.latestRealGesture.id, window.latestRealGesture.w);
-                        detectedConf.textContent = `${window.latestRealGesture.conf || 80}%`;
+                        detectedWord.textContent = g.id_word || idwById(g.id, g.w);
+                        detectedConf.textContent = `${g.conf || 80}%`;
                         return;
                     }
-                    confidence = window.latestRealGesture.conf || 95;
+                    confidence = g.conf || 95;
                     holdCount++;
                     if (holdCount < 3) return;
                     pass = true;
                 } else if (!forcePass) {
-                    // Jangan pernah next otomatis kalau tangan belum cocok
+                    holdCount = 0;
+                    detectedWord.textContent = 'MENUNGGU GERAKAN...';
+                    detectedConf.textContent = '--%';
                     pass = false;
                     return;
                 }
@@ -1717,6 +1906,13 @@
                     detectedConf.textContent = `${confidence}%`;
                     detectedConf.className = 'mint';
                     playBeep('success');
+
+                    // Simpan progres lokal dan sinkronisasi ke server untuk stiker profil
+                    if (currentSign && currentSign.id) {
+                        learned.add(currentSign.id);
+                        syncLearned(currentSign.id, true);
+                        saveState();
+                    }
 
                     setTimeout(() => {
                         sessionResults[currentIndex] = true;
@@ -1767,10 +1963,16 @@
             const beginListening = async (seconds) => {
                 autoRun = true;
                 if (!startTime) startTime = Date.now();
-                await Promise.all([loadLetterModel(), loadNumberModel()]);
-                if (!$('#camera-viewport')) return;
-                if (!$('#camera-viewport video')) {
-                    await initCamera($('#camera-viewport'));
+                await Promise.all([loadLetterModel(), loadNumberModel(), loadDynamicModel()]);
+                const vp = $('#camera-viewport');
+                if (!vp) return;
+                if (!vp.querySelector('video')) {
+                    const ok = await initCamera(vp);
+                    if (!ok) {
+                        autoRun = false;
+                        isRunning = false;
+                        return;
+                    }
                 }
                 if (!autoRun || !$('#cam-tracking-box')) return;
                 const ok = await runCountdown(seconds);
@@ -1782,6 +1984,31 @@
                 const word = $('#cam-detected-word');
                 if (word) word.textContent = `LISTENING FOR: ${idw(currentSign)}`;
             };
+
+            const simBadge = $('#btn-toggle-sim');
+            if (simBadge) {
+                simBadge.onclick = () => {
+                    const isSim = simBadge.textContent.includes('SIMULASI');
+                    const vp = $('#camera-viewport');
+                    if (isSim) {
+                        initCamera(vp);
+                    } else {
+                        if (cameraStream) {
+                            cameraStream.getTracks().forEach(t => t.stop());
+                            cameraStream = null;
+                        }
+                        if (vp) {
+                            vp.querySelectorAll('video').forEach(v => v.remove());
+                            vp.querySelectorAll('.cam-error-overlay').forEach(v => v.remove());
+                            simBadge.textContent = 'MODE: SIMULASI AKTIF';
+                            simBadge.style.background = '#e0f2fe';
+                            simBadge.style.color = '#0369a1';
+                            startLandmarkTracking(vp, null, true);
+                            toast('Mode simulasi aktif.');
+                        }
+                    }
+                };
+            }
 
             $('#btn-cam-start').onclick = () => {
                 toast('Recognition active. Show gesture to camera.');
@@ -1822,7 +2049,11 @@
                 };
             });
 
-            if (autoRun) beginListening(2);
+            if (autoRun) {
+                beginListening(2);
+            } else if ($('#camera-viewport') && !$('#camera-viewport video')) {
+                initCamera($('#camera-viewport'));
+            }
         }
 
         renderPracticeStep();
@@ -1832,7 +2063,7 @@
     // TRANSLATE VIEW (Gesture -> Text, Sentence Builder, Text -> Voice)
     // =========================================================================
     function translate() {
-        window.recogMode = 'huruf';
+        window.recogMode = 'kata';
         let activeTab = 0; // 0: Gesture -> Text, 1: Sentence Builder, 2: Text -> Voice
         let sentenceWords = [
             GESTURES.find(g => g.id === 'hello') || { w: 'HELLO', e: '👋' },
@@ -1993,7 +2224,8 @@
                             </div>
                             <div class="cam-controls-bar">
                                 <button class="btn p" id="btn-trans-cam-start">START CAMERA</button>
-                                <button class="btn" id="btn-trans-mode" onclick="window.recogMode = window.recogMode === 'angka' ? 'huruf' : 'angka'; this.textContent = 'MODE: ' + window.recogMode.toUpperCase();">MODE: HURUF</button>
+                                <button class="btn" id="btn-trans-mode">MODE: KATA (SEMUA KATA)</button>
+                                <button class="btn" id="btn-trans-add" style="background: var(--c-primary, #004E2F); color: #fff;">+ MASUKKAN KE KALIMAT</button>
                                 <button class="btn" id="btn-trans-simulate">+ SIMULATE GESTURE</button>
                             </div>
                         </div>
@@ -2007,7 +2239,7 @@
                                 </p>
                                 <span class="meta">QUICK INSERT:</span>
                                 <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;">
-                                    ${GESTURES.slice(0, 6).map(g => `
+                                    ${(GESTURES.filter(g => g.level === 'kata' || g.level === 'kalimat').length ? GESTURES.filter(g => g.level === 'kata' || g.level === 'kalimat') : GESTURES).slice(0, 8).map(g => `
                                         <button class="btn sm" data-add-sign="${g.id}">${idw(g)}</button>
                                     `).join('')}
                                 </div>
@@ -2098,52 +2330,90 @@
                 const camBox = $('#trans-cam-box');
                 const startBtn = $('#btn-trans-cam-start');
                 const simBtn = $('#btn-trans-simulate');
+                const modeBtn = $('#btn-trans-mode');
+                const addBtn = $('#btn-trans-add');
 
-                const appendDetectedGesture = () => {
-                    let sign = null;
-                    if (window.latestRealGesture) {
-                        sign = GESTURES.find(g => g.id === window.latestRealGesture.id) || {
-                            id: window.latestRealGesture.id,
-                            w: window.latestRealGesture.w,
-                            e: window.latestRealGesture.e
+                const modes = ['kata', 'huruf', 'angka'];
+                const modeLabels = {
+                    'kata': 'MODE: KATA (SEMUA KATA)',
+                    'huruf': 'MODE: HURUF (A-Z)',
+                    'angka': 'MODE: ANGKA (0-9)'
+                };
+
+                if (modeBtn) {
+                    modeBtn.textContent = modeLabels[window.recogMode] || 'MODE: KATA (SEMUA KATA)';
+                    modeBtn.onclick = () => {
+                        const idx = modes.indexOf(window.recogMode);
+                        window.recogMode = modes[(idx + 1) % modes.length];
+                        modeBtn.textContent = modeLabels[window.recogMode];
+                        toast('Mode pengenalan diubah ke: ' + window.recogMode.toUpperCase());
+                        const label = $('#trans-detected-label');
+                        if (label) label.textContent = 'READY TO RECOGNIZE';
+                    };
+                }
+
+                if (addBtn) {
+                    addBtn.onclick = () => appendDetectedGesture();
+                }
+
+                const appendDetectedGesture = (forceSign = null) => {
+                    let sign = forceSign;
+                    if (!sign && window.latestRealGesture) {
+                        const g = window.latestRealGesture;
+                        sign = GESTURES.find(x => x.id === g.id) || {
+                            id: g.id,
+                            w: g.w || g.letter,
+                            id_word: g.id_word || idwById(g.id, g.w) || g.w,
+                            e: g.e || '◇'
                         };
-                    } else {
-                        sign = GESTURES[Math.floor(Math.random() * Math.min(12, GESTURES.length))];
                     }
                     if (sign) {
                         sentenceWords.push(sign);
                         const label = $('#trans-detected-label');
-                        if (label) label.textContent = `${idw(sign)} (${window.latestRealGesture ? window.latestRealGesture.conf : 94}% CONFIDENCE)`;
+                        if (label) {
+                            const wordText = idw(sign) || sign.w;
+                            label.textContent = `${wordText} (${window.latestRealGesture ? window.latestRealGesture.conf : 94}% KEYAKINAN)`;
+                        }
                         playBeep('success');
                         refreshSentenceTray();
+                        toast(`"${idw(sign) || sign.w}" dimasukkan ke kalimat`);
+                    } else {
+                        toast('Belum ada gerakan terdeteksi untuk dimasukkan ke kalimat.');
                     }
                 };
 
                 let isTransRunning = false;
                 startBtn.onclick = async () => {
                     if (isTransRunning) {
-                        clearInterval(cameraTimer);
                         isTransRunning = false;
                         startBtn.textContent = 'START CAMERA';
                         startBtn.classList.add('p');
-                        toast('Translation paused.');
+                        toast('Penerjemah dijeda.');
                         return;
                     }
 
-                    if (!cameraStream) await initCamera(camBox);
-                    appendDetectedGesture();
-                    clearInterval(cameraTimer);
-                    cameraTimer = setInterval(appendDetectedGesture, 3600);
+                    if (!cameraStream) {
+                        const ok = await initCamera(camBox);
+                        if (!ok) return;
+                    }
                     isTransRunning = true;
                     startBtn.textContent = 'PAUSE CAMERA';
                     startBtn.classList.remove('p');
-                    toast('Continuous translation running.');
+                    toast('Kamera penerjemah aktif. Tunjukkan gerakan tangan.');
                 };
 
                 simBtn.onclick = () => {
-                    appendDetectedGesture();
-                    toast('Simulated gesture detected');
+                    const pool = GESTURES.filter(g => g.level === 'kata' || g.level === 'kalimat');
+                    const sim = (pool.length ? pool : GESTURES)[Math.floor(Math.random() * (pool.length || GESTURES.length))];
+                    appendDetectedGesture(sim);
                 };
+
+                const resultCard = camBox.querySelector('.cam-result-card');
+                if (resultCard) {
+                    resultCard.style.cursor = 'pointer';
+                    resultCard.title = 'Klik untuk masukkan gerakan yang terdeteksi ke kalimat';
+                    resultCard.onclick = () => appendDetectedGesture();
+                }
 
                 $$('[data-add-sign]').forEach(b => {
                     b.onclick = () => {
