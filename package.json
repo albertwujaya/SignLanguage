@@ -1,12 +1,9 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
-    "type": "commonjs",
-    "engines": {
-        "node": "22.x"
-    },
+    "type": "module",
     "scripts": {
-        "build": "vite build && node -e \"const fs=require('fs'); if(!fs.existsSync('dist')) fs.mkdirSync('dist'); fs.writeFileSync('dist/index.html', '<!doctype html><html><body>ok</body></html>');\"",
+        "build": "vite build",
         "dev": "vite"
     },
     "devDependencies": {
