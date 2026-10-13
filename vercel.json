@@ -3,12 +3,12 @@
   "builds": [
     {
       "src": "api/index.php",
-      "use": "vercel-php@0.9.0"
+      "use": "vercel-php@0.7.3"
     }
   ],
   "routes": [
     {
-      "src": "/(css|js|fonts|images|models|build|gestures)/(.*)",
+      "src": "/(css|js|fonts|images|models|build)/(.*)",
       "dest": "/public/$1/$2"
     },
     {
