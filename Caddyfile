@@ -1,0 +1,12 @@
+{
+	auto_https off
+}
+
+:80 {
+	root * /app/public
+	encode gzip
+
+	php_server {
+		resolve_root_symlink
+	}
+}

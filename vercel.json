@@ -1,26 +1,15 @@
 {
   "version": 2,
-  "functions": {
-    "api/index.php": {
-      "runtime": "vercel-php@latest"
+  "builds": [
+    {
+      "src": "Dockerfile",
+      "use": "@vercel/docker"
     }
-  },
+  ],
   "routes": [
     {
-      "src": "/(css|js|fonts|images|models|build|gestures)/(.*)",
-      "dest": "/public/$1/$2"
-    },
-    {
-      "src": "/favicon.ico",
-      "dest": "/public/favicon.ico"
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/public/robots.txt"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/api/index.php"
+      "dest": "/"
     }
   ]
 }
