@@ -14,8 +14,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/theme.css') }}?v={{ @filemtime(public_path('css/theme.css')) ?: time() }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}?v={{ @filemtime(public_path('css/theme.css')) ?: '1' }}">
 </head>
 <body>
     <!-- Minimalist Translucent Header -->
@@ -137,8 +137,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
-    <script src="{{ asset('js/dynamic.js') }}?v={{ filemtime(public_path('js/dynamic.js')) }}"></script>
-    <script src="{{ asset('js/app.js') }}?v={{ filemtime(public_path('js/app.js')) }}"></script>
-    <script src="{{ asset('js/anim.js') }}?v={{ filemtime(public_path('js/anim.js')) }}" defer></script>
+    <script src="{{ asset('js/dynamic.js') }}?v={{ @filemtime(public_path('js/dynamic.js')) ?: '1' }}"></script>
+    <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) ?: '1' }}"></script>
+    <script src="{{ asset('js/anim.js') }}?v={{ @filemtime(public_path('js/anim.js')) ?: '1' }}" defer></script>
 </body>
 </html>
