@@ -51,9 +51,7 @@ RUN mkdir -p \
     bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Configure Caddy/FrankenPHP
-ENV SERVER_NAME=:80
+# Configure Caddy/FrankenPHP — Vercel sets PORT at runtime
+ENV SERVER_NAME=:${PORT:-80}
 
 COPY Caddyfile /etc/caddy/Caddyfile
-
-EXPOSE 80
