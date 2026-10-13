@@ -88,29 +88,15 @@ class Gesture extends Model
 
     public function imageUrl(): ?string
     {
-        if (! $this->image_path) {
-            return null;
-        }
-
-        // Jalur publik langsung di /images/gestures/... (dijamin 100% aktif di Vercel static router)
-        if (file_exists(public_path('images/'.$this->image_path))) {
-            return asset('images/'.$this->image_path);
-        }
-
-        return Storage::disk('public')->url($this->image_path);
+        return $this->image_path
+            ? Storage::disk('public')->url($this->image_path)
+            : null;
     }
 
     public function videoFileUrl(): ?string
     {
-        if (! $this->video_path) {
-            return null;
-        }
-
-        // Jalur publik langsung di /images/gestures/... (dijamin 100% aktif di Vercel static router)
-        if (file_exists(public_path('images/'.$this->video_path))) {
-            return asset('images/'.$this->video_path);
-        }
-
-        return Storage::disk('public')->url($this->video_path);
+        return $this->video_path
+            ? Storage::disk('public')->url($this->video_path)
+            : null;
     }
 }

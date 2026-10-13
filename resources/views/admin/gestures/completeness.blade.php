@@ -90,5 +90,5 @@
             </tbody>
         </table>
     </div>
-    <div class="pagination">{{ $incompleteGestures->links('admin.partials.pagination') }}</div>
+    <div class="pagination">{{ $incompleteGestures->links() }}</div>
 @endsection

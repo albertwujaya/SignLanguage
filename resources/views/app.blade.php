@@ -14,8 +14,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
-    <link rel="stylesheet" href="{{ asset('css/theme.css') }}?v={{ @filemtime(public_path('css/theme.css')) ?: time() }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
 </head>
 <body>
     <!-- Minimalist Translucent Header -->
@@ -58,21 +58,21 @@
     <footer class="site-footer">
         <div class="footer-wrap">
             <div class="footer-left">
-                <span class="meta cy">SIGNESIA | SIGN LANGUAGE</span>
-                <p class="footer-desc">Pengenalan gestur lewat kamera berupa simulasi, dan kamus BISINDO.</p>
+                <span class="meta cy">SIGN LANGUAGE / PROYEK LOMBA KAMPUS</span>
+                <p class="footer-desc">Pengenalan gestur lewat kamera masih berupa simulasi, dan isi kamus belum diverifikasi oleh penutur BISINDO.</p>
                 <a class="footer-link" href="#/about">Tentang kami</a>
             </div>
             <div class="footer-meta-grid">
                 <div>
-                    <span class="meta">BELAJAR,</span>
-                    <span class="val"></span>
+                    <span class="meta">KAMERA</span>
+                    <span class="val">MASIH SIMULASI</span>
                 </div>
                 <div>
-                    <span class="meta">LATIHAN</span>
-                    <span class="val"></span>
+                    <span class="meta">ISI KAMUS</span>
+                    <span class="val">BELUM DIVERIFIKASI</span>
                 </div>
                 <div>
-                    <span class="meta">KAMUS</span>
+                    <span class="meta">KOSAKATA</span>
                     <span class="val" id="ft-total-signs">&mdash;</span>
                 </div>
             </div>
@@ -126,7 +126,6 @@
             sessionUrl: "{{ url('/api/practice-sessions') }}"
         };
         window.GESTURES_URL = "{{ url('/api/gestures') }}";
-        window.GESTURES_FALLBACK_URL = "{{ url('/api/index.php/api/gestures') }}";
         window.STATS_URL = "{{ url('/api/stats') }}";
         window.HERO_IMG = "{{ asset('images/hero.jpg') }}";
         window.PRACTICE_IMG = "{{ asset('images/practice.jpg') }}";
@@ -137,8 +136,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 
-    <script src="{{ asset('js/dynamic.js') }}?v={{ filemtime(public_path('js/dynamic.js')) }}"></script>
-    <script src="{{ asset('js/app.js') }}?v={{ filemtime(public_path('js/app.js')) }}"></script>
-    <script src="{{ asset('js/anim.js') }}?v={{ filemtime(public_path('js/anim.js')) }}" defer></script>
+    <script src="{{ asset('js/dynamic.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/anim.js') }}" defer></script>
 </body>
 </html>

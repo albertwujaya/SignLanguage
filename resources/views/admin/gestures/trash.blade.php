@@ -56,5 +56,5 @@
             </tbody>
         </table>
     </div>
-    <div class="pagination">{{ $gestures->links('admin.partials.pagination') }}</div>
+    <div class="pagination">{{ $gestures->links() }}</div>
 @endsection

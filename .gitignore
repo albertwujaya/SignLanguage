@@ -23,7 +23,6 @@
 /storage/*.key
 /storage/pail
 /vendor
-/video_hasil
 _ide_helper.php
 Homestead.json
 Homestead.yaml

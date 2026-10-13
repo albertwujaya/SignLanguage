@@ -15,30 +15,6 @@ Route::get('/api/gestures', [GestureController::class, 'index'])->name('gestures
 Route::get('/api/gestures/{slug}', [GestureController::class, 'show'])->name('gestures.show');
 Route::get('/api/stats', [GestureController::class, 'stats'])->name('gestures.stats');
 
-// Route khusus untuk melayani file video & poster gestur baik di local maupun serverless Vercel
-Route::get('/storage/gestures/{type}/{filename}', function (string $type, string $filename) {
-    $possiblePaths = [
-        public_path("images/gestures/{$type}/{$filename}"),
-        storage_path("app/public/gestures/{$type}/{$filename}"),
-    ];
-
-    foreach ($possiblePaths as $filePath) {
-        if (file_exists($filePath)) {
-            $mime = str_ends_with($filename, '.mp4')
-                ? 'video/mp4'
-                : (str_ends_with($filename, '.webp') ? 'image/webp' : 'image/jpeg');
-
-            return response()->file($filePath, [
-                'Content-Type' => $mime,
-                'Cache-Control' => 'public, max-age=31536000, immutable',
-                'Access-Control-Allow-Origin' => '*',
-            ]);
-        }
-    }
-
-    abort(404);
-})->where('type', 'videos|images')->name('gestures.media');
-
 Route::get('/setup', [AuthController::class, 'setup'])->name('setup');
 Route::post('/setup', [AuthController::class, 'storeFirstAdmin'])
     ->middleware('throttle:3,1')
