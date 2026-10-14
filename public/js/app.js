@@ -1294,7 +1294,7 @@
                 <div class="meta">01 / LEARN</div>
                 <h1 class="big">LEARN</h1>
                 <p class="sub">Build your vocabulary, one gesture at a time.</p>
-                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                <div class="learn-header-progress" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 14px;">
                     <span class="pill cyan">TOTAL PROGRESS: ${totalProgress}%</span>
                     <span class="meta">${totalLearned} OF ${totalSigns} GESTURES MASTERED</span>
                 </div>

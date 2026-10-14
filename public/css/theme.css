@@ -276,6 +276,13 @@ nav.top a::after { display: none; }
     line-height: 1.45 !important;
     color: var(--t2);
 }
+.learn-header-progress {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 14px !important;
+}
 
 .practice-header {
     margin-bottom: 26px !important;
@@ -535,6 +542,10 @@ nav.top a::after { display: none; }
         font-size: 13.5px !important;
         line-height: 1.4 !important;
         margin: 4px 0 0 !important;
+    }
+    .learn-header-progress {
+        margin-top: 12px !important;
+        gap: 10px !important;
     }
     .wrap { padding-left: 14px; padding-right: 14px; }
 
