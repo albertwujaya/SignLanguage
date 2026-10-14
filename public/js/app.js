@@ -2667,7 +2667,6 @@
                     <span class="pill cyan">${CN[gesture.c] || gesture.c}</span>
                     <h2 class="modal-title">${idw(gesture)}</h2>
                 </div>
-                <button class="clear-search-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
             </div>
 
             <div class="modal-visual-side">
@@ -2714,7 +2713,7 @@
         modal.classList.add('on');
 
         const close = () => closeModal();
-        $('#modal-close-btn').onclick = close;
+        if ($('#modal-close-btn')) $('#modal-close-btn').onclick = close;
         $('#btn-modal-done').onclick = close;
         $('#btn-modal-practice').onclick = () => { closeModal(); };
 
