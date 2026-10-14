@@ -2232,9 +2232,9 @@
                             </div>
                             <div class="cam-controls-bar">
                                 <button class="btn p" id="btn-trans-cam-start">START CAMERA</button>
-                                <button class="btn" id="btn-trans-mode">MODE: KATA (SEMUA KATA)</button>
-                                <button class="btn" id="btn-trans-add" style="background: var(--c-primary, #004E2F); color: #fff;">+ MASUKKAN KE KALIMAT</button>
-                                <button class="btn" id="btn-trans-simulate">+ SIMULATE GESTURE</button>
+                                <button class="btn" id="btn-trans-mode">MODE: KATA</button>
+                                <button class="btn" id="btn-trans-add" style="background: var(--c-primary, #004E2F); color: #fff;">+ KE KALIMAT</button>
+                                <button class="btn" id="btn-trans-simulate">+ SIMULATE</button>
                             </div>
                         </div>
 
@@ -2343,13 +2343,13 @@
 
                 const modes = ['kata', 'huruf', 'angka'];
                 const modeLabels = {
-                    'kata': 'MODE: KATA (SEMUA KATA)',
+                    'kata': 'MODE: KATA',
                     'huruf': 'MODE: HURUF (A-Z)',
                     'angka': 'MODE: ANGKA (0-9)'
                 };
 
                 if (modeBtn) {
-                    modeBtn.textContent = modeLabels[window.recogMode] || 'MODE: KATA (SEMUA KATA)';
+                    modeBtn.textContent = modeLabels[window.recogMode] || 'MODE: KATA';
                     modeBtn.onclick = () => {
                         const idx = modes.indexOf(window.recogMode);
                         window.recogMode = modes[(idx + 1) % modes.length];
