@@ -177,18 +177,31 @@
         const cls = opts.className || '';
         const isMini = Boolean(opts.mini);
 
+        // Thumbnail / Mini card optimization: prioritize lightweight lazy image
+        if (isMini && image) {
+            return `
+            <div class="gesture-media-wrap ${cls}">
+                <img class="gesture-media-image"
+                    src="${escapeHtml(image)}"
+                    alt="Poster gerakan ${escapeHtml(label)}"
+                    loading="lazy"
+                    onerror="this.onerror=null; this.closest('.gesture-media-wrap').innerHTML='<div class=\\'mini-svg-diagram fallback-avatar\\'><span>${escapeHtml((word || label || '?')[0].toUpperCase())}</span></div>';"
+                >
+            </div>
+            `;
+        }
+
         if (video) {
             const posterAttr = image ? ` poster="${escapeHtml(image)}"` : '';
+            const playbackAttrs = isMini
+                ? 'preload="none" playsinline muted'
+                : 'autoplay loop muted playsinline preload="metadata"';
             return `
             <div class="gesture-media-wrap ${cls}">
                 <video class="gesture-media-video"
                     src="${escapeHtml(video)}"
                     ${posterAttr}
-                    autoplay
-                    loop
-                    muted
-                    playsinline
-                    preload="metadata"
+                    ${playbackAttrs}
                     aria-label="Video gerakan ${escapeHtml(label)}"
                     onerror="this.onerror=null; this.closest('.gesture-media-wrap').innerHTML='<div class=\\'mini-svg-diagram fallback-avatar\\'><span>${escapeHtml((word || label || '?')[0].toUpperCase())}</span></div>';"
                 ></video>
@@ -2503,22 +2516,22 @@
                 <div class="meta">04 / DICTIONARY</div>
                 <h1 class="big">DICTIONARY</h1>
                 <p class="sub">Explore every recognized gesture in our neural database.</p>
+            </div>
                 
-                <input class="dictionary-search-input" id="dict-query-input" placeholder="SEARCH A WORD, E.G. 'HALO'..." aria-label="Search gesture dictionary">
+            <input class="dictionary-search-input" id="dict-query-input" placeholder="SEARCH A WORD, E.G. 'HALO'..." aria-label="Search gesture dictionary">
 
-                <div class="dict-filter-chips" role="tablist">
-                    ${[
-                        ['all', 'ALL'],
-                        ['greet', 'GREETING'],
-                        ['conv', 'CONVERSATION'],
-                        ['days', 'DAYS'],
-                        ['verbs', 'VERBS'],
-                        ['num', 'NUMBERS'],
-                        ['alpha', 'ALPHABET']
-                    ].map(f => `
-                        <button class="dict-filter-btn ${f[0] === activeFilter ? 'is-active' : ''}" data-filter="${f[0]}">${f[1]}</button>
-                    `).join('')}
-                </div>
+            <div class="dict-filter-chips" role="tablist">
+                ${[
+                    ['all', 'ALL'],
+                    ['greet', 'GREETING'],
+                    ['conv', 'CONVERSATION'],
+                    ['days', 'DAYS'],
+                    ['verbs', 'VERBS'],
+                    ['num', 'NUMBERS'],
+                    ['alpha', 'ALPHABET']
+                ].map(f => `
+                    <button class="dict-filter-btn ${f[0] === activeFilter ? 'is-active' : ''}" data-filter="${f[0]}">${f[1]}</button>
+                `).join('')}
             </div>
 
             <div id="dict-grid-container"></div>
@@ -2568,7 +2581,7 @@
                         </div>
 
                         <div class="gesture-card-preview">
-                            ${renderGestureMedia(g, { className: 'dict-card-media' })}
+                            ${renderGestureMedia(g, { className: 'dict-card-media', mini: true })}
                         </div>
 
                         <div class="gesture-card-meta">

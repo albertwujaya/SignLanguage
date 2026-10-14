@@ -609,22 +609,24 @@ nav.top a::after { display: none; }
 
     .page { padding-top: calc(92px + env(safe-area-inset-top, 0px)) !important; padding-bottom: 100px; }
     .page-header, .practice-header {
-        margin-bottom: 20px !important;
-        padding-bottom: 14px !important;
+        margin-bottom: 16px !important;
+        padding-bottom: 12px !important;
+        border-bottom: 2px solid var(--line) !important;
     }
     .page-header .big, .practice-header .big {
-        font-size: clamp(32px, 8.5vw, 44px) !important;
-        line-height: 1.1 !important;
-        margin: 4px 0 8px !important;
+        font-size: clamp(28px, 7.5vw, 32px) !important;
+        line-height: 1.15 !important;
+        margin: 2px 0 4px !important;
     }
     .page-header .sub, .practice-header .sub {
-        font-size: 13.5px !important;
+        font-size: 13px !important;
         line-height: 1.4 !important;
-        margin: 4px 0 0 !important;
+        margin: 2px 0 0 !important;
+        display: block !important;
     }
     .learn-header-progress {
-        margin-top: 12px !important;
-        gap: 10px !important;
+        margin-top: 10px !important;
+        gap: 8px !important;
     }
     .wrap { padding-left: 14px; padding-right: 14px; }
 
@@ -860,24 +862,13 @@ nav.top a::after { display: none; }
     .cam-result-card { left: 10px; right: 10px; bottom: 10px; padding: 10px 12px; gap: 8px; }
     .session-stats-grid { grid-template-columns: 1fr; gap: 14px; padding: 20px 0; margin: 24px 0; }
 
-    /* Terjemah: Header & Tab Navigasi Segmented Modern & Ramping */
-    .page[aria-label*="Translation"] .page-header {
-        margin-bottom: 12px !important;
-        padding-bottom: 8px !important;
-    }
-    .page[aria-label*="Translation"] .page-header .big {
-        font-size: 28px !important;
-        margin: 2px 0 4px !important;
-    }
-    .page[aria-label*="Translation"] .page-header .sub {
-        display: none !important;
-    }
+    /* Terjemah: Tab Navigasi Segmented Modern & Ramping */
     .translate-tabs {
         display: flex !important;
         background: var(--bg3) !important;
-        border: 2px solid var(--ink) !important;
+        border: 1.5px solid var(--ink) !important;
         border-radius: 999px !important;
-        box-shadow: 2.5px 2.5px 0 var(--ink) !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
         padding: 3px !important;
         gap: 3px !important;
         margin-bottom: 14px !important;
@@ -916,8 +907,8 @@ nav.top a::after { display: none; }
         aspect-ratio: 4 / 3 !important;
         max-height: 250px !important;
         border-radius: 14px !important;
-        border-width: 2px !important;
-        box-shadow: 3px 3px 0 var(--ink) !important;
+        border: 1.5px solid var(--ink) !important;
+        box-shadow: 2.5px 2.5px 0 var(--ink) !important;
         padding: 0 !important;
         position: relative !important;
         overflow: hidden !important;
@@ -931,8 +922,8 @@ nav.top a::after { display: none; }
         top: 8px !important;
         left: 8px !important;
         padding: 3px 8px !important;
-        font-size: 9px !important;
-        border-width: 1.5px !important;
+        font-size: 8.5px !important;
+        border: 1.5px solid var(--ink) !important;
         box-shadow: 1.5px 1.5px 0 var(--ink) !important;
         border-radius: 999px !important;
     }
@@ -941,7 +932,7 @@ nav.top a::after { display: none; }
         right: 8px !important;
         padding: 3px 8px !important;
         font-size: 8.5px !important;
-        border-width: 1.5px !important;
+        border: 1.5px solid var(--ink) !important;
         box-shadow: 1.5px 1.5px 0 var(--ink) !important;
         border-radius: 999px !important;
         max-width: 48% !important;
@@ -951,31 +942,34 @@ nav.top a::after { display: none; }
         left: 8px !important;
         right: 8px !important;
         bottom: 8px !important;
-        padding: 8px 12px !important;
+        padding: 6px 10px !important;
         gap: 6px !important;
         border-radius: 10px !important;
-        border-width: 1.5px !important;
-        box-shadow: 2px 2px 0 var(--ink) !important;
+        border: 1.5px solid var(--ink) !important;
+        box-shadow: 1.5px 1.5px 0 var(--ink) !important;
         background: rgba(255, 249, 234, 0.94) !important;
         backdrop-filter: blur(8px) !important;
+        align-items: center !important;
+        min-height: 0 !important;
     }
     #trans-cam-box .cam-result-card .meta,
     #camera-viewport .cam-result-card .meta {
-        font-size: 8.5px !important;
+        font-size: 8px !important;
         letter-spacing: 0.05em !important;
         margin-bottom: 1px !important;
     }
     #trans-cam-box .cam-result-card b,
     #camera-viewport .cam-result-card b {
-        font-size: 15px !important;
-        line-height: 1.2 !important;
+        font-size: 13px !important;
+        line-height: 1.15 !important;
+        display: block !important;
     }
     #trans-cam-box .cam-result-card .pill.cyan,
     #camera-viewport .cam-result-card .pill.cyan {
-        font-size: 8.5px !important;
-        padding: 2px 7px !important;
+        font-size: 8px !important;
+        padding: 2px 6px !important;
         border-radius: 999px !important;
-        border-width: 1.5px !important;
+        border: 1px solid var(--ink) !important;
     }
 
     /* Tombol Kontrol Kamera Terjemahan & Latihan: Ramping, Seimbang, Tidak Menutupi Layar */
@@ -989,13 +983,14 @@ nav.top a::after { display: none; }
     .cam-controls-bar .btn {
         flex: none !important;
         width: 100% !important;
-        min-height: 38px !important;
-        height: 38px !important;
+        min-height: 36px !important;
+        height: 36px !important;
         padding: 0 8px !important;
-        font-size: 10.5px !important;
+        font-size: 10px !important;
+        font-weight: 700 !important;
         line-height: 1.2 !important;
         border-radius: 999px !important;
-        border-width: 1.5px !important;
+        border: 1.5px solid var(--ink) !important;
         box-shadow: 2px 2px 0 var(--ink) !important;
         display: flex !important;
         align-items: center !important;
@@ -1011,24 +1006,11 @@ nav.top a::after { display: none; }
         font-weight: 800 !important;
     }
 
-    /* Header Latihan Mandiri di Mobile */
-    .page-header.practice-header {
-        margin-bottom: 12px !important;
-        padding-bottom: 8px !important;
-    }
-    .page-header.practice-header .big {
-        font-size: 28px !important;
-        margin: 2px 0 4px !important;
-    }
-    .page-header.practice-header .sub {
-        display: none !important;
-    }
-
     /* Target Card di Practice & Quick Insert di Translate */
     .practice-target-card {
         padding: 12px 14px !important;
         border-radius: 14px !important;
-        border-width: 2px !important;
+        border: 1.5px solid var(--ink) !important;
         box-shadow: 2.5px 2.5px 0 var(--ink) !important;
         margin-top: 10px !important;
     }
@@ -1170,37 +1152,78 @@ nav.top a::after { display: none; }
         padding: 6px 4px !important;
     }
 
-    /* Kamus: kartu horizontal ringkas (1 kolom) */
-    .dictionary-search-input { padding: 14px 16px; font-size: 14px; }
-    .dict-filter-chips { gap: 8px; margin: 16px 0 24px; }
-    .dict-filter-btn { padding: 7px 12px; font-size: 10px; }
-    .gesture-grid { grid-template-columns: 1fr; gap: 14px; }
+    /* Kamus: kartu horizontal ringkas, modern, dan bersih */
+    .dictionary-search-input {
+        padding: 12px 14px !important;
+        font-size: 13px !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 12px !important;
+        box-shadow: inset 1.5px 1.5px 0 rgba(43,33,24,.06) !important;
+        margin-bottom: 12px !important;
+    }
+    .dict-filter-chips {
+        gap: 6px !important;
+        margin: 0 0 16px !important;
+    }
+    .dict-filter-btn {
+        padding: 6px 12px !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 999px !important;
+        box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+    }
+    .dict-filter-btn.is-active {
+        background: var(--mustard) !important;
+        color: var(--ink) !important;
+    }
+    .gesture-grid { grid-template-columns: 1fr; gap: 12px; }
     .gesture-card-item {
-        display: grid; grid-template-columns: 84px 1fr; grid-template-rows: auto auto; column-gap: 14px; row-gap: 6px;
-        min-height: 0; padding: 14px; box-shadow: 4px 4px 0 var(--ink);
+        display: grid;
+        grid-template-columns: 80px 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 12px;
+        row-gap: 6px;
+        min-height: 0;
+        padding: 12px !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 14px !important;
+        box-shadow: 2.5px 2.5px 0 var(--ink) !important;
     }
     .gesture-card-top { grid-column: 1 / -1; align-items: center; }
-    .gesture-card-preview { margin: 0; height: 84px; grid-column: 1; align-self: center; }
-    .gesture-card-preview svg { width: 72px; height: 72px; }
+    .gesture-card-preview {
+        margin: 0;
+        height: 80px;
+        grid-column: 1;
+        align-self: center;
+        border-radius: 10px !important;
+        border: 1.5px solid var(--ink) !important;
+        box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+        overflow: hidden !important;
+    }
+    .gesture-card-preview svg { width: 68px; height: 68px; }
     .gesture-card-preview .gesture-media-wrap,
     .gesture-card-preview .gesture-media-video,
     .gesture-card-preview .gesture-media-image {
-        width: 84px; height: 84px; object-fit: cover;
+        width: 80px; height: 80px; object-fit: cover;
     }
     .how-to-sign-grid .flip-back-media { width: 80px; height: 80px; }
     .gesture-card-meta { grid-column: 2; align-self: center; min-width: 0; }
-    .gesture-card-meta > div:last-child { margin-top: 8px !important; }
-    .gesture-card-meta h3 { font-size: 20px; }
+    .gesture-card-meta > div:last-child { margin-top: 6px !important; }
+    .gesture-card-meta h3 { font-size: 19px; }
 
-    /* Modal detail di Mobile: Rapi, Video frame mulus tanpa outline ganda */
+    /* Modal detail di Mobile: Rapi, Modern, Flex Column Tanpa Tabrakan Teks */
     .modal { padding: 12px; align-items: flex-start; }
     .modal.on { align-items: flex-start; }
     .modal-box {
-        padding: 22px 16px 24px !important;
-        gap: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 18px 16px 20px !important;
+        gap: 10px !important;
         max-height: calc(100svh - 24px) !important;
-        box-shadow: 4px 4px 0 var(--ink) !important;
-        border-radius: var(--radius-lg, 20px) !important;
+        border: 1.5px solid var(--ink) !important;
+        box-shadow: 3px 3px 0 var(--ink) !important;
+        border-radius: 16px !important;
         overflow-y: auto !important;
     }
     .modal-top-bar {
@@ -1208,7 +1231,7 @@ nav.top a::after { display: none; }
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        margin-bottom: 12px !important;
+        margin-bottom: 8px !important;
         padding-bottom: 8px !important;
         border-bottom: 1.5px dashed var(--line) !important;
     }
@@ -1224,33 +1247,37 @@ nav.top a::after { display: none; }
     }
     .modal-visual-side {
         min-height: 0 !important;
-        padding: 4px 0 0 !important;
-        margin: 4px 0 12px !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 0 6px !important;
         background: transparent !important;
         border: none !important;
         width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
     }
     .modal-visual-side .gesture-media-wrap {
         width: 100% !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         overflow: hidden !important;
-        margin-top: 0 !important;
-        background: #181411 !important;
-        border: 2px solid var(--ink) !important;
-        box-shadow: 3px 3px 0 var(--ink) !important;
-        padding: 10px 8px !important;
+        margin: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
         box-sizing: border-box !important;
     }
     .modal-visual-side .gesture-media-video,
     .modal-visual-side .gesture-media-image {
         width: 100% !important;
-        max-height: 220px !important;
+        max-height: 200px !important;
         aspect-ratio: 16 / 10 !important;
         object-fit: contain !important;
-        border: none !important;
-        border-radius: 10px !important;
-        box-shadow: none !important;
-        background: transparent !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 12px !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
+        background: #000 !important;
         display: block !important;
         margin: 0 auto !important;
     }
@@ -1259,16 +1286,42 @@ nav.top a::after { display: none; }
         width: 100% !important;
     }
     .modal-media-label {
-        margin-top: 10px !important;
-        font-size: 10px !important;
-        letter-spacing: 0.06em !important;
+        margin-top: 6px !important;
+        font-size: 9.5px !important;
+        letter-spacing: 0.05em !important;
+        text-align: center !important;
+    }
+    .modal-info-side {
+        width: 100% !important;
     }
     .modal-info-side h2 {
-        font-size: clamp(24px, 7vw, 32px) !important;
-        margin: 6px 0 10px !important;
+        font-size: 22px !important;
+        margin: 4px 0 8px !important;
+    }
+    .modal-detail-row {
+        margin-bottom: 10px !important;
+    }
+    .modal-detail-row .meta {
+        font-size: 9.5px !important;
+        display: block !important;
+        margin-bottom: 2px !important;
+    }
+    .modal-detail-row p {
+        font-size: 13px !important;
+        line-height: 1.4 !important;
+        margin: 0 !important;
     }
     .modal-actions { gap: 8px; margin-top: 14px; }
-    .modal-actions .btn { flex: 1 1 auto; padding: 0 14px; }
+    .modal-actions .btn {
+        flex: 1 1 auto;
+        padding: 0 12px;
+        min-height: 38px;
+        height: 38px;
+        font-size: 10.5px;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 999px !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
+    }
 
     /* Overlay pencarian */
     .ov { padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px; }
