@@ -106,7 +106,7 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 .session-dot { border: 2px solid var(--ink); background: var(--paper); }
 .session-dot.on, .session-dot.done, .session-dot.active { background: var(--sage); }
 .flip-back { background: #FFF3CF; }
-.sign-anim-box { background: var(--bg3); border-radius: var(--radius-md); border: 2px dashed var(--ink); }
+.sign-anim-box { background: transparent; border-radius: var(--radius-md); border: none; }
 .modal-visual-side {
     background: transparent !important;
     border: none !important;
@@ -144,26 +144,32 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 .gesture-media-wrap { border-radius: var(--radius-sm); }
 .sign-anim-box .gesture-media-video, .sign-anim-box .gesture-media-image {
     max-height: 250px;
-    border-radius: var(--radius-sm);
+    border-radius: 12px;
+    border: 1px solid rgba(43,33,24,0.15);
+    background: transparent;
+    box-shadow: none;
 }
 .gesture-card-preview .gesture-media-video, .gesture-card-preview .gesture-media-image {
-    border: 2px solid var(--ink);
-    border-radius: 12px;
-    box-shadow: 2px 2px 0 var(--ink);
-    background: #000;
+    border: 1px solid rgba(43,33,24,0.12);
+    border-radius: 10px;
+    box-shadow: none;
+    background: transparent;
 }
 .how-to-sign-grid .flip-back-media {
-    border: 2.5px solid var(--ink);
+    border: 1.5px solid var(--ink);
     border-radius: 12px;
     box-shadow: 2px 2px 0 var(--ink);
-    background: #000;
+    background: transparent;
 }
 .modal-visual-side .gesture-media-wrap {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
 }
 .modal-visual-side .gesture-media-video, .modal-visual-side .gesture-media-image {
     width: 100%;
@@ -171,11 +177,11 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
     max-height: 250px;
     aspect-ratio: 16 / 9;
     object-fit: contain;
-    border: 2px solid var(--ink);
-    border-radius: 16px;
-    box-shadow: 3.5px 3.5px 0 var(--ink);
-    background: #181411;
-    padding: 6px;
+    border: 1px solid rgba(43,33,24,0.15);
+    border-radius: 14px;
+    box-shadow: none;
+    background: transparent;
+    padding: 0;
     box-sizing: border-box;
 }
 .modal-media-label {
@@ -1074,13 +1080,16 @@ nav.top a::after { display: none; }
 
     /* Target Card di Practice & Quick Insert di Translate: Rapi & Ditengah */
     .practice-target-card {
-        padding: 12px 14px !important;
+        padding: 14px 16px !important;
         border-radius: 14px !important;
         border: 1.5px solid var(--ink) !important;
-        box-shadow: 2.5px 2.5px 0 var(--ink) !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
         margin-top: 10px !important;
         width: 100% !important;
-        max-width: 480px !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
@@ -1091,16 +1100,37 @@ nav.top a::after { display: none; }
     .practice-target-card .sign-anim-box {
         min-height: 0 !important;
         margin: 8px 0 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    .practice-target-card .sign-anim-box .gesture-media-wrap {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
     }
     .practice-target-card .sign-anim-box .gesture-media-video,
     .practice-target-card .sign-anim-box .gesture-media-image {
-        max-height: 170px !important;
+        max-height: 180px !important;
+        aspect-ratio: 16 / 10 !important;
         object-fit: contain !important;
         border-radius: 12px !important;
-        background: #181411 !important;
+        border: 1px solid rgba(43,33,24,0.14) !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        display: block !important;
+        margin: 0 auto !important;
     }
     .practice-target-card .practice-session-dots {
         margin: 6px 0 10px !important;
+    }
+    .practice-sim-selector {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
     .practice-sim-selector > div {
         display: flex !important;
@@ -1109,7 +1139,14 @@ nav.top a::after { display: none; }
         gap: 6px !important;
         margin-top: 6px !important;
         padding-bottom: 4px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
         -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+    }
+    .practice-sim-selector > div::-webkit-scrollbar {
+        display: none !important;
     }
     .practice-target-card h3 {
         font-size: 14px !important;
@@ -1123,15 +1160,6 @@ nav.top a::after { display: none; }
         font-size: 9px !important;
         letter-spacing: 0.05em !important;
     }
-    .practice-target-card > div:last-child {
-        display: flex !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        gap: 6px !important;
-        margin-top: 6px !important;
-        padding-bottom: 4px !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
     .practice-target-card .btn.sm {
         flex-shrink: 0 !important;
         white-space: nowrap !important;
@@ -1140,7 +1168,7 @@ nav.top a::after { display: none; }
         padding: 0 10px !important;
         font-size: 10.5px !important;
         border-radius: 999px !important;
-        border-width: 1.5px !important;
+        border: 1.5px solid var(--ink) !important;
         box-shadow: 1.5px 1.5px 0 var(--ink) !important;
     }
 
@@ -1302,8 +1330,9 @@ nav.top a::after { display: none; }
         grid-column: 1;
         align-self: center;
         border-radius: 10px !important;
-        border: 1.5px solid var(--ink) !important;
-        box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+        border: 1px solid rgba(43,33,24,0.14) !important;
+        box-shadow: none !important;
+        background: transparent !important;
         overflow: hidden !important;
     }
     .gesture-card-preview svg { width: 68px; height: 68px; }
@@ -1311,6 +1340,9 @@ nav.top a::after { display: none; }
     .gesture-card-preview .gesture-media-video,
     .gesture-card-preview .gesture-media-image {
         width: 80px; height: 80px; object-fit: cover;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
     }
     .how-to-sign-grid .flip-back-media { width: 80px; height: 80px; }
     .gesture-card-meta { grid-column: 2; align-self: center; min-width: 0; }
@@ -1336,25 +1368,37 @@ nav.top a::after { display: none; }
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 10px !important;
         padding-bottom: 8px !important;
-        border-bottom: 1.5px dashed var(--line) !important;
+        border-bottom: 1px solid rgba(43,33,24,0.12) !important;
+        gap: 8px !important;
     }
     .modal-heading-group {
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
-        flex-wrap: wrap !important;
+        gap: 8px !important;
+        flex-wrap: nowrap !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+    }
+    .modal-heading-group .pill {
+        flex-shrink: 0 !important;
+        font-size: 10px !important;
+        padding: 4px 8px !important;
     }
     .modal-title {
-        font-size: 22px !important;
+        font-size: 18px !important;
         margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.2 !important;
     }
     .modal-visual-side {
         min-height: 0 !important;
         height: auto !important;
         padding: 0 !important;
-        margin: 0 0 6px !important;
+        margin: 0 0 8px !important;
         background: transparent !important;
         border: none !important;
         width: 100% !important;
@@ -1379,10 +1423,10 @@ nav.top a::after { display: none; }
         max-height: 200px !important;
         aspect-ratio: 16 / 10 !important;
         object-fit: contain !important;
-        border: 1.5px solid var(--ink) !important;
+        border: 1px solid rgba(43,33,24,0.14) !important;
         border-radius: 12px !important;
-        box-shadow: 2px 2px 0 var(--ink) !important;
-        background: #000 !important;
+        box-shadow: none !important;
+        background: transparent !important;
         display: block !important;
         margin: 0 auto !important;
     }
@@ -1391,10 +1435,7 @@ nav.top a::after { display: none; }
         width: 100% !important;
     }
     .modal-media-label {
-        margin-top: 6px !important;
-        font-size: 9.5px !important;
-        letter-spacing: 0.05em !important;
-        text-align: center !important;
+        display: none !important;
     }
     .modal-info-side {
         width: 100% !important;

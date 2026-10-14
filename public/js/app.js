@@ -2672,9 +2672,6 @@
 
             <div class="modal-visual-side">
                 ${renderGestureMedia(gesture, { className: 'modal-gesture-media' })}
-                <div class="meta cy modal-media-label">
-                    ${gesture.video_file ? 'VIDEO FOOTAGE GERAKAN' : (gesture.image ? 'POSTER GERAKAN' : 'BIOMECHANICAL VECTOR DIAGRAM')}
-                </div>
             </div>
 
             <div class="modal-info-side">
