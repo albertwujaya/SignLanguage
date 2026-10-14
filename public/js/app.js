@@ -1526,22 +1526,31 @@
             </div>
 
             <!-- Controls Bar -->
-            <div class="lesson-controls">
-                <button class="btn" id="btn-prev-lesson" ${!prevG ? 'disabled' : ''} aria-label="Kata sebelumnya">SEBELUMNYA</button>
-                <button class="btn p" id="btn-mark-learned" aria-pressed="${isDone}">
-                    ${isDone ? 'SUDAH DIPELAJARI ✓' : 'TANDAI SUDAH DIPELAJARI'}
+            <div class="lesson-controls lesson-nav-controls">
+                <button class="btn" id="btn-prev-lesson" ${!prevG ? 'disabled' : ''} aria-label="Kata sebelumnya">
+                    <svg class="btn-nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+                    <span class="btn-nav-text">SEBELUMNYA</span>
                 </button>
-                <button class="btn" id="btn-next-lesson" ${!nextG ? 'disabled' : ''} aria-label="Kata berikutnya">BERIKUTNYA</button>
+                <button class="btn p" id="btn-mark-learned" aria-pressed="${isDone}">
+                    <span class="btn-mark-full">${isDone ? 'SUDAH DIPELAJARI ✓' : 'TANDAI SUDAH DIPELAJARI'}</span>
+                    <span class="btn-mark-short">${isDone ? 'DIPELAJARI ✓' : 'TANDAI BELAJAR'}</span>
+                </button>
+                <button class="btn" id="btn-next-lesson" ${!nextG ? 'disabled' : ''} aria-label="Kata berikutnya">
+                    <span class="btn-nav-text">BERIKUTNYA</span>
+                    <svg class="btn-nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
             </div>
 
-            <div class="lesson-controls" style="margin-top: 14px; gap: 12px;">
+            <div class="lesson-controls lesson-action-controls">
                 <a class="btn sm" href="#/practice/${cat[0]}" aria-label="Latihan semua kata di kategori ${cat[1]}">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                    LATIHAN KATEGORI INI
+                    <span class="btn-action-full">LATIHAN KATEGORI INI</span>
+                    <span class="btn-action-short">LATIHAN KATEGORI</span>
                 </a>
                 <a class="btn sm" href="#/practice/${current.id}" aria-label="Latihan gestur ${idw(current)} saja">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                    LATIHAN GESTUR INI
+                    <span class="btn-action-full">LATIHAN GESTUR INI</span>
+                    <span class="btn-action-short">LATIHAN GESTUR</span>
                 </a>
             </div>
         </section>
@@ -1565,12 +1574,12 @@
         markBtn.onclick = () => {
             if (learned.has(current.id)) {
                 learned.delete(current.id);
-                markBtn.textContent = 'TANDAI SUDAH DIPELAJARI';
+                markBtn.innerHTML = '<span class="btn-mark-full">TANDAI SUDAH DIPELAJARI</span><span class="btn-mark-short">TANDAI BELAJAR</span>';
                 markBtn.setAttribute('aria-pressed', 'false');
                 toast(`${idw(current)} ditandai belum dipelajari`);
             } else {
                 learned.add(current.id);
-                markBtn.innerHTML = 'SUDAH DIPELAJARI ✓';
+                markBtn.innerHTML = '<span class="btn-mark-full">SUDAH DIPELAJARI ✓</span><span class="btn-mark-short">DIPELAJARI ✓</span>';
                 markBtn.setAttribute('aria-pressed', 'true');
                 playBeep('success');
                 toast(`${idw(current)} ditandai sudah dipelajari`);
@@ -1828,19 +1837,19 @@
                 <div class="practice-target-card">
                     <div class="meta cy">${categoryLabel} • STEP ${pad(currentIndex + 1)} / ${pad(sessionLength)}</div>
                     
-                    <div style="margin-top: 24px;">
+                    <div class="practice-target-header-block">
                         <span class="meta">CURRENT TARGET SIGN</span>
                         <h2 class="practice-target-word">
                             "${idw(currentSign)}"
                         </h2>
-                        ${enw(currentSign) ? `<div class="meta cy" style="margin-bottom: 12px;">ENGLISH: ${enw(currentSign)}</div>` : ''}
+                        ${enw(currentSign) ? `<div class="meta cy practice-target-en">ENGLISH: ${enw(currentSign)}</div>` : ''}
                     </div>
 
-                    <div class="sign-anim-box" style="margin: 16px 0; min-height: 160px;">
+                    <div class="sign-anim-box practice-target-anim-box">
                         ${renderGestureMedia(currentSign, { className: 'practice-target-media' })}
                     </div>
 
-                    <p style="color: var(--t2); font-size: 14px; line-height: 1.5; margin: 0 0 20px;">
+                    <p class="practice-target-desc">
                         ${currentSign.desc}
                     </p>
 
