@@ -2268,11 +2268,11 @@
                         </div>
                     </div>
                 ` : `
-                    <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div class="sentence-tray-header">
                         <span class="meta cy">VISUAL SENTENCE CONSTRUCTION TRAY</span>
-                        <div style="display: flex; gap: 10px; align-items: center;">
+                        <div class="sentence-insert-wrap">
                             <span class="meta">INSERT GESTURE:</span>
-                            <select id="select-dict-add" style="background: var(--bg2); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--t1); font-family: var(--font-heading); font-size: 11px;">
+                            <select id="select-dict-add" class="sentence-dict-select">
                                 <option value="">+ Choose gesture...</option>
                                 ${GESTURES.map(g => `<option value="${g.id}">${idw(g)} (${enw(g) || CN[g.c]})</option>`).join('')}
                             </select>

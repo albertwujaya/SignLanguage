@@ -236,6 +236,33 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 .feat-visual-overlay { background: linear-gradient(180deg, transparent 40%, rgba(43,33,24,.55)); }
 @keyframes cloudDrift { from { transform: translateX(-4%); } to { transform: translateX(6%); } }
 
+/* ---- Sentence Construction Tray Header & Select ---- */
+.sentence-tray-header {
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+.sentence-insert-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.sentence-dict-select {
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    border-radius: 10px;
+    padding: 7px 12px;
+    color: var(--ink);
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 600;
+    box-shadow: 1.5px 1.5px 0 var(--ink);
+    max-width: 100%;
+}
+
 /* ---- Kamera = foto polaroid + selotip ---- */
 .cam-viewport-wrap {
     background: var(--paper); border: 2.5px solid var(--ink); border-radius: 10px; padding: 14px 14px 52px;
@@ -628,7 +655,7 @@ nav.top a::after { display: none; }
         margin-top: 10px !important;
         gap: 8px !important;
     }
-    .wrap { padding-left: 14px; padding-right: 14px; }
+    .wrap { padding-left: 18px !important; padding-right: 18px !important; }
 
     /* Hero */
     .hero { min-height: auto; padding-top: 108px; padding-bottom: 64px; }
@@ -854,12 +881,33 @@ nav.top a::after { display: none; }
     .lesson-controls .btn.sm { flex: 1 1 100%; }
 
     /* Latihan & Terjemah */
-    .practice-layout { gap: 14px !important; }
-    .cam-viewport-wrap { padding: 8px; border-radius: 14px; aspect-ratio: 4 / 3; box-shadow: 3.5px 3.5px 0 var(--ink); }
-    .cam-viewport-wrap::before { width: 90px; margin-left: -45px; top: -12px; height: 22px; }
-    .cam-live-indicator { top: 10px; left: 10px; }
-    .cam-sim-badge { top: 10px; right: 10px; max-width: 46%; text-align: center; }
-    .cam-result-card { left: 10px; right: 10px; bottom: 10px; padding: 10px 12px; gap: 8px; }
+    /* Latihan & Terjemah */
+    .practice-layout {
+        gap: 14px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    .practice-layout > div {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+    .cam-viewport-wrap {
+        padding: 0 !important;
+        border-radius: 14px !important;
+        aspect-ratio: 16 / 9 !important;
+        box-shadow: 2.5px 2.5px 0 var(--ink) !important;
+        width: 100% !important;
+        max-width: 480px !important;
+        margin: 0 auto !important;
+    }
+    .cam-viewport-wrap::before { display: none !important; }
+    .cam-live-indicator { top: 8px !important; left: 8px !important; }
+    .cam-sim-badge { top: 8px !important; right: 8px !important; max-width: 48% !important; text-align: center !important; }
+    .cam-result-card { left: 8px !important; right: 8px !important; bottom: 8px !important; padding: 6px 10px !important; gap: 6px !important; }
     .session-stats-grid { grid-template-columns: 1fr; gap: 14px; padding: 20px 0; margin: 24px 0; }
 
     /* Terjemah: Tab Navigasi Segmented Modern & Ramping */
@@ -901,11 +949,13 @@ nav.top a::after { display: none; }
         box-shadow: 1.5px 1.5px 0 var(--ink) !important;
     }
 
-    /* Viewport Kamera Terjemahan & Latihan: Luas, Nyaman, Konsisten di Mobile */
+    /* Viewport Kamera Terjemahan & Latihan: Luas (16:9), Ditengah (Center), Nyaman di Mobile */
     #trans-cam-box,
     #camera-viewport {
-        aspect-ratio: 4 / 3 !important;
-        max-height: 250px !important;
+        aspect-ratio: 16 / 9 !important;
+        width: 100% !important;
+        max-width: 480px !important;
+        margin: 0 auto !important;
         border-radius: 14px !important;
         border: 1.5px solid var(--ink) !important;
         box-shadow: 2.5px 2.5px 0 var(--ink) !important;
@@ -916,6 +966,21 @@ nav.top a::after { display: none; }
     #trans-cam-box::before,
     #camera-viewport::before {
         display: none !important;
+    }
+    .cam-viewport-wrap video,
+    #trans-cam-box video,
+    #camera-viewport video {
+        position: absolute !important;
+        inset: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        object-position: center center !important;
+        transform: scaleX(-1) !important;
+        transform-origin: center center !important;
+        display: block !important;
+        margin: 0 auto !important;
+        z-index: 1 !important;
     }
     #trans-cam-box .cam-live-indicator,
     #camera-viewport .cam-live-indicator {
@@ -972,13 +1037,14 @@ nav.top a::after { display: none; }
         border: 1px solid var(--ink) !important;
     }
 
-    /* Tombol Kontrol Kamera Terjemahan & Latihan: Ramping, Seimbang, Tidak Menutupi Layar */
+    /* Tombol Kontrol Kamera Terjemahan & Latihan: Ramping, Seimbang, Ditengah */
     .cam-controls-bar {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 6px !important;
         width: 100% !important;
-        margin-top: 10px !important;
+        max-width: 480px !important;
+        margin: 10px auto 0 !important;
     }
     .cam-controls-bar .btn {
         flex: none !important;
@@ -1006,13 +1072,17 @@ nav.top a::after { display: none; }
         font-weight: 800 !important;
     }
 
-    /* Target Card di Practice & Quick Insert di Translate */
+    /* Target Card di Practice & Quick Insert di Translate: Rapi & Ditengah */
     .practice-target-card {
         padding: 12px 14px !important;
         border-radius: 14px !important;
         border: 1.5px solid var(--ink) !important;
         box-shadow: 2.5px 2.5px 0 var(--ink) !important;
         margin-top: 10px !important;
+        width: 100% !important;
+        max-width: 480px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
     .practice-target-card .practice-target-word {
         font-size: 22px !important;
@@ -1074,15 +1144,50 @@ nav.top a::after { display: none; }
         box-shadow: 1.5px 1.5px 0 var(--ink) !important;
     }
 
+    /* Header Susun Kalimat & Select Dropdown: Rapi, Berjarak dari Tepi */
+    .sentence-tray-header {
+        margin-bottom: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .sentence-insert-wrap {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+    }
+    .sentence-insert-wrap .meta {
+        font-size: 9.5px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+    }
+    .sentence-dict-select {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 11.5px !important;
+        padding: 7px 10px !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 10px !important;
+        box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+        box-sizing: border-box !important;
+        background: #fff !important;
+        color: var(--ink) !important;
+    }
+
     /* Tray Susun Kalimat & Output Hasil */
     .sentence-builder-tray {
-        padding: 8px 10px !important;
+        padding: 10px 12px !important;
         min-height: 48px !important;
         gap: 6px !important;
-        margin: 6px 0 12px !important;
+        margin: 6px 0 14px !important;
         border-radius: 12px !important;
-        border-width: 2px !important;
-        box-shadow: 2.5px 2.5px 0 var(--ink) !important;
+        border: 1.5px solid var(--ink) !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
     }
     .sentence-block-chip {
         padding: 4px 8px !important;
