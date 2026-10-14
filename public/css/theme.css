@@ -115,12 +115,13 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 }
 .modal-top-bar {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     width: 100%;
     grid-column: 1 / -1;
-    margin-bottom: 8px;
-    border-bottom: none;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px dashed var(--line);
 }
 .btn-nav-icon { display: none; }
 .btn-nav-text { display: inline; }
@@ -140,7 +141,7 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 }
 .modal-title {
     font-family: var(--font-heading);
-    font-size: 26px;
+    font-size: 32px;
     font-weight: 800;
     margin: 0;
     color: var(--ink);
@@ -1547,6 +1548,9 @@ nav.top a::after { display: none; }
         padding-bottom: 0 !important;
         border-bottom: none !important;
         gap: 8px !important;
+    }
+    #modal-close-btn {
+        display: none !important;
     }
     .modal-heading-group {
         display: flex !important;
