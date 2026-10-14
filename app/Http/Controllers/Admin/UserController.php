@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateUserRoleRequest;
 use App\Models\AdminActivityLog;
 use App\Models\Gesture;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -83,6 +84,17 @@ class UserController extends Controller
 
         $users = $query->paginate(20)->withQueryString();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'users' => $users,
+                'totalPublished' => $totalPublished,
+                'adminCount' => User::query()->where('role', 'admin')->count(),
+                'editorCount' => User::query()->where('role', 'editor')->count(),
+                'userCount' => User::query()->whereNotIn('role', ['admin', 'editor'])->count(),
+                'currentTab' => $tab ?? 'students',
+            ]);
+        }
+
         return view('admin.users.index', [
             'users' => $users,
             'totalPublished' => $totalPublished,
@@ -96,7 +108,7 @@ class UserController extends Controller
         ]);
     }
 
-    public function show(User $user): View
+    public function show(Request $request, User $user): View|JsonResponse
     {
         $totalPublished = Gesture::published()->count();
 
@@ -146,6 +158,21 @@ class UserController extends Controller
 
         $totalLearned = $learnedGestures->count();
         $totalProgressPercent = $totalPublished > 0 ? round(($totalLearned / $totalPublished) * 100, 1) : 0;
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'user' => $user,
+                'totalPublished' => $totalPublished,
+                'totalLearned' => $totalLearned,
+                'totalProgressPercent' => $totalProgressPercent,
+                'levelStats' => $levelStats,
+                'learnedGestures' => $learnedGestures,
+                'sessionsCount' => $sessionsCount,
+                'avgScore' => $avgScore,
+                'maxScore' => $maxScore,
+                'minScore' => $minScore,
+            ]);
+        }
 
         return view('admin.users.show', [
             'user' => $user,
@@ -224,17 +251,24 @@ class UserController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    public function store(StoreUserRequest $request): RedirectResponse
+    public function store(StoreUserRequest $request): RedirectResponse|JsonResponse
     {
         $validated = $request->validated();
         $user = User::create($validated + ['role' => 'editor']);
 
         AdminActivityLog::record('create', $user, "Menambahkan akun editor {$user->name} ({$user->email})");
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Akun editor berhasil dibuat.',
+                'user' => $user,
+            ], 201);
+        }
+
         return to_route('admin.users.index')->with('status', 'Akun editor berhasil dibuat.');
     }
 
-    public function updateRole(UpdateUserRoleRequest $request, User $user): RedirectResponse
+    public function updateRole(UpdateUserRoleRequest $request, User $user): RedirectResponse|JsonResponse
     {
         abort_if($request->user()->is($user), 403);
 
@@ -249,10 +283,17 @@ class UserController extends Controller
 
         AdminActivityLog::record('update', $user, "Mengubah role {$user->name} dari {$oldRole} menjadi {$user->role}");
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Role akun berhasil diperbarui.',
+                'user' => $user,
+            ]);
+        }
+
         return to_route('admin.users.index')->with('status', 'Role akun berhasil diperbarui.');
     }
 
-    public function destroy(Request $request, User $user): RedirectResponse
+    public function destroy(Request $request, User $user): RedirectResponse|JsonResponse
     {
         abort_if($request->user()->is($user), 403);
 
@@ -264,6 +305,12 @@ class UserController extends Controller
         $user->delete();
 
         AdminActivityLog::record('delete', null, "Menghapus akun {$name}");
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Akun berhasil dihapus.',
+            ]);
+        }
 
         return to_route('admin.users.index')->with('status', 'Akun berhasil dihapus.');
     }

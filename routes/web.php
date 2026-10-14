@@ -78,6 +78,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:access-admin'])
     Route::get('/gestures/analytics', [AdminGestureController::class, 'analytics'])->name('gestures.analytics');
     Route::post('/gestures/{gesture}/toggle-status', [AdminGestureController::class, 'toggleStatus'])->name('gestures.toggle-status');
     Route::get('/gestures/{gesture}/preview', [AdminGestureController::class, 'preview'])->name('gestures.preview');
+    Route::post('/upload-media', [AdminGestureController::class, 'uploadMedia'])->name('upload-media');
 
     Route::middleware('can:delete-gestures')->group(function (): void {
         Route::get('/gestures/trash', [AdminGestureController::class, 'trash'])->name('gestures.trash');

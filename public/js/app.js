@@ -182,6 +182,7 @@
                     playsinline
                     preload="metadata"
                     aria-label="Video gerakan ${escapeHtml(label)}"
+                    onerror="this.onerror=null; this.closest('.gesture-media-wrap').innerHTML='<div class=\\'mini-svg-diagram fallback-avatar\\'><span>${escapeHtml((word || label || '?')[0].toUpperCase())}</span></div>';"
                 ></video>
             </div>
             `;
@@ -194,6 +195,7 @@
                     src="${escapeHtml(image)}"
                     alt="Poster gerakan ${escapeHtml(label)}"
                     loading="lazy"
+                    onerror="this.onerror=null; this.closest('.gesture-media-wrap').innerHTML='<div class=\\'mini-svg-diagram fallback-avatar\\'><span>${escapeHtml((word || label || '?')[0].toUpperCase())}</span></div>';"
                 >
             </div>
             `;
@@ -1397,8 +1399,8 @@
                 ${list.map(g => {
                     const isLearned = learned.has(g.id);
                     const thumbMedia = g.image
-                        ? `<img class="wli-thumb" src="${escapeHtml(g.image)}" alt="Stiker gerakan ${escapeHtml(idw(g))}" loading="lazy">`
-                        : `<span class="wli-thumb wli-thumb-placeholder">${escapeHtml(g.e || '👋')}</span>`;
+                        ? `<img class="wli-thumb" src="${escapeHtml(g.image)}" alt="Stiker gerakan ${escapeHtml(idw(g))}" loading="lazy" onerror="this.onerror=null; this.outerHTML='<span class=\\'wli-thumb wli-thumb-placeholder\\'>${escapeHtml(g.e || (idw(g)[0] ? idw(g)[0].toUpperCase() : '👋'))}</span>';">`
+                        : `<span class="wli-thumb wli-thumb-placeholder">${escapeHtml(g.e || (idw(g)[0] ? idw(g)[0].toUpperCase() : '👋'))}</span>`;
 
                     return `
                     <li role="listitem">

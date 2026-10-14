@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\GestureRequest;
 use App\Models\AdminActivityLog;
 use App\Models\Gesture;
 use App\Models\PracticeAttempt;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,7 +15,7 @@ use Illuminate\View\View;
 
 class GestureController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): View|JsonResponse
     {
         $query = Gesture::query()
             ->when($request->level, fn ($q, $v) => $q->where('level', $v))
@@ -51,6 +52,18 @@ class GestureController extends Controller
         $totalCount = (int) $stats->sum('count');
         $publishedCount = (int) $stats->where('status', Gesture::STATUS_PUBLISHED)->sum('count');
         $draftCount = (int) $stats->where('status', Gesture::STATUS_DRAFT)->sum('count');
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'gestures' => $query->paginate(20),
+                'levels' => Gesture::LEVELS,
+                'countsByLevel' => $countsByLevel,
+                'totalCount' => $totalCount,
+                'publishedCount' => $publishedCount,
+                'draftCount' => $draftCount,
+                'categoryLabels' => Gesture::CATEGORY_LABELS,
+            ]);
+        }
 
         return view('admin.gestures.index', [
             'gestures' => $query->paginate(15)->withQueryString(),
@@ -91,7 +104,7 @@ class GestureController extends Controller
         ]);
     }
 
-    public function store(GestureRequest $request): RedirectResponse
+    public function store(GestureRequest $request): RedirectResponse|JsonResponse
     {
         $data = $this->handleMediaUploads($request);
         $data['status'] = $data['status'] ?? Gesture::STATUS_PUBLISHED;
@@ -99,6 +112,13 @@ class GestureController extends Controller
         $gesture = Gesture::create($data);
 
         AdminActivityLog::record('create', $gesture, "Menambahkan gesture '{$gesture->word}' ({$gesture->level})");
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Gesture berhasil ditambahkan.',
+                'gesture' => $gesture,
+            ], 201);
+        }
 
         $fromLevel = $request->input('from_level') ?? $request->query('from_level');
         $params = ($fromLevel && array_key_exists($fromLevel, Gesture::LEVELS)) ? ['level' => $fromLevel] : [];
@@ -124,12 +144,19 @@ class GestureController extends Controller
         ]);
     }
 
-    public function update(GestureRequest $request, Gesture $gesture): RedirectResponse
+    public function update(GestureRequest $request, Gesture $gesture): RedirectResponse|JsonResponse
     {
         $data = $this->handleMediaUploads($request, $gesture);
         $gesture->update($data);
 
         AdminActivityLog::record('update', $gesture, "Memperbarui gesture '{$gesture->word}'");
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Gesture berhasil diperbarui.',
+                'gesture' => $gesture,
+            ]);
+        }
 
         $fromLevel = $request->input('from_level') ?? $request->query('from_level');
         $params = ($fromLevel && array_key_exists($fromLevel, Gesture::LEVELS)) ? ['level' => $fromLevel] : [];
@@ -137,7 +164,7 @@ class GestureController extends Controller
         return to_route('admin.gestures.index', $params)->with('status', 'Gesture berhasil diperbarui.');
     }
 
-    public function destroy(Gesture $gesture): RedirectResponse
+    public function destroy(Request $request, Gesture $gesture): RedirectResponse|JsonResponse
     {
         $word = $gesture->word;
         // Soft delete: arsipkan, media tidak langsung dihapus agar bisa dipulihkan
@@ -145,10 +172,16 @@ class GestureController extends Controller
 
         AdminActivityLog::record('delete', $gesture, "Memindahkan gesture '{$word}' ke tempat sampah");
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => "Gesture '{$word}' dipindahkan ke tempat sampah.",
+            ]);
+        }
+
         return to_route('admin.gestures.index')->with('status', "Gesture '{$word}' dipindahkan ke tempat sampah.");
     }
 
-    public function toggleStatus(Gesture $gesture): RedirectResponse
+    public function toggleStatus(Request $request, Gesture $gesture): RedirectResponse|JsonResponse
     {
         $newStatus = $gesture->status === Gesture::STATUS_PUBLISHED
             ? Gesture::STATUS_DRAFT
@@ -160,6 +193,13 @@ class GestureController extends Controller
         $label = $newStatus === Gesture::STATUS_PUBLISHED ? 'diterbitkan' : 'dijadikan draft';
 
         AdminActivityLog::record($action, $gesture, "Mengubah status gesture '{$gesture->word}' menjadi {$label}");
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => "Status gesture '{$gesture->word}' berhasil diubah menjadi {$label}.",
+                'gesture' => $gesture,
+            ]);
+        }
 
         return back()->with('status', "Status gesture '{$gesture->word}' berhasil diubah menjadi {$label}.");
     }
@@ -297,16 +337,72 @@ class GestureController extends Controller
 
             if ($request->hasFile($input)) {
                 $this->deleteFile($gesture?->{$column});
-                $data[$column] = $request->file($input)->store('gestures/'.$input.'s', 'public');
+                $storedPath = $request->file($input)->store('gestures/'.$input.'s', 'public');
+                $data[$column] = $storedPath;
+
+                try {
+                    $publicDir = public_path('images/gestures/'.$input.'s');
+                    if (! file_exists($publicDir)) {
+                        @mkdir($publicDir, 0755, true);
+                    }
+                    @copy(storage_path('app/public/'.$storedPath), $publicDir.'/'.basename($storedPath));
+                } catch (\Throwable) {
+                }
             } elseif ($gesture && $request->boolean('remove_'.$input)) {
                 $this->deleteFile($gesture->{$column});
                 $data[$column] = null;
+            } elseif (! isset($data[$column]) && $gesture) {
+                $data[$column] = $gesture->{$column};
             }
         }
 
         $data['sort_order'] = $data['sort_order'] ?? 0;
 
         return $data;
+    }
+
+    public function uploadMedia(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'max:30720'],
+            'type' => ['nullable', 'in:image,video'],
+        ]);
+
+        $file = $request->file('file');
+        $mime = (string) $file->getMimeType();
+        $isImage = str_starts_with($mime, 'image/');
+        $isVideo = str_starts_with($mime, 'video/');
+
+        if (! $isImage && ! $isVideo) {
+            return response()->json([
+                'message' => 'File harus berupa gambar (JPG/PNG/WebP) atau video (MP4/WebM).',
+            ], 422);
+        }
+
+        $folder = $isVideo ? 'gestures/videos' : 'gestures/images';
+        $storedPath = $file->store($folder, 'public');
+
+        try {
+            $publicDir = public_path('images/'.$folder);
+            if (! file_exists($publicDir)) {
+                @mkdir($publicDir, 0755, true);
+            }
+            @copy(storage_path('app/public/'.$storedPath), $publicDir.'/'.basename($storedPath));
+        } catch (\Throwable) {
+        }
+
+        $publicUrl = file_exists(public_path('images/'.$storedPath))
+            ? asset('images/'.$storedPath)
+            : Storage::disk('public')->url($storedPath);
+
+        return response()->json([
+            'success' => true,
+            'path' => $storedPath,
+            'url' => $publicUrl,
+            'filename' => basename($storedPath),
+            'mime' => $mime,
+            'size' => $file->getSize(),
+        ], 201);
     }
 
     private function deleteFile(?string $path): void

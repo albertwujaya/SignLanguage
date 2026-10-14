@@ -49,6 +49,8 @@ class GestureRequest extends FormRequest
             // SVG sengaja tidak diizinkan (bisa memuat script).
             'image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'video' => ['nullable', 'file', 'mimetypes:video/mp4,video/webm', 'max:30720'],
+            'image_path' => ['nullable', 'string', 'max:255'],
+            'video_path' => ['nullable', 'string', 'max:255'],
             'remove_image' => ['nullable', 'boolean'],
             'remove_video' => ['nullable', 'boolean'],
         ];
