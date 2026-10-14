@@ -1240,12 +1240,12 @@
         <!-- MAJOR FEATURE EDITORIAL SECTIONS -->
         <section class="feature-editorial-list wrap" aria-label="Core Platform Modules">
             ${features.map(f => `
-                <article class="feat-item">
+                <article class="feat-item" data-link="${f.link}" tabindex="0" role="link" aria-label="Buka fitur ${f.title}">
                     <div class="feat-num" aria-hidden="true">${f.num}</div>
                     <div class="feat-content">
                         <div class="meta cy">${f.num} / ${f.tag}</div>
-                        <h2 class="h2" style="margin: 16px 0 20px;">${f.title}</h2>
-                        <p style="color: var(--t2); font-size: 17px; max-width: 46ch; line-height: 1.6; margin: 0 0 28px;">
+                        <h2 class="h2">${f.title}</h2>
+                        <p class="feat-desc-desktop">
                             ${f.desc}
                         </p>
                         <a href="${f.link}" class="btn">EXPLORE ${f.tag}</a>
@@ -2651,19 +2651,19 @@
 
         modal.innerHTML = `
         <div class="modal-box" role="dialog" aria-modal="true" aria-label="${idw(gesture)} details">
+            <div class="modal-top-bar">
+                <span class="pill cyan">${CN[gesture.c] || gesture.c}</span>
+                <button class="clear-search-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
+            </div>
+
             <div class="modal-visual-side">
                 ${renderGestureMedia(gesture, { className: 'modal-gesture-media' })}
-                <div class="meta cy" style="margin-top: 18px;">
+                <div class="meta cy modal-media-label">
                     ${gesture.video_file ? 'VIDEO FOOTAGE GERAKAN' : (gesture.image ? 'POSTER GERAKAN' : 'BIOMECHANICAL VECTOR DIAGRAM')}
                 </div>
             </div>
 
             <div class="modal-info-side">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span class="pill cyan">${CN[gesture.c] || gesture.c}</span>
-                    <button class="clear-search-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
-                </div>
-
                 <h2>${idw(gesture)}</h2>
                 ${enw(gesture) ? `<div class="meta cy" style="margin-bottom: 18px;">ENGLISH: ${enw(gesture)}</div>` : ''}
 
@@ -3030,6 +3030,11 @@
 
     document.addEventListener('click', e => {
         if (e.target.closest('[data-retry]')) loadGestures();
+        const feat = e.target.closest('.feat-item');
+        if (feat && !e.target.closest('a')) {
+            const link = feat.getAttribute('data-link');
+            if (link) location.hash = link;
+        }
     });
 
     // Beranda dan About tidak butuh data gestur, jadi langsung tampil tanpa menunggu.

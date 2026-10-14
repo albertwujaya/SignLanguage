@@ -690,6 +690,30 @@
             font-weight: 600;
             font-size: 14px;
         }
+
+        /* ---- PROFILE FOOTER ---- */
+        .profile-site-footer {
+            margin-top: 48px;
+            padding: 24px 16px 36px;
+            border-top: 2.5px solid var(--ink);
+            text-align: center;
+            background: var(--surface);
+            border-radius: 16px 16px 0 0;
+        }
+        .profile-footer-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            font-family: "Fredoka", sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .profile-brand { color: var(--ink); letter-spacing: 0.05em; }
+        .profile-sep { color: var(--muted); }
+        .profile-link { color: var(--coral); text-decoration: underline; text-underline-offset: 3px; font-weight: 700; }
+        .profile-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -959,6 +983,16 @@
                 </div>
             </form>
         </section>
+
+        {{-- FOOTER KHUSUS PROFILE & MOBILE --}}
+        <footer class="profile-site-footer">
+            <div class="profile-footer-content">
+                <span class="profile-brand">SIGNESIA • © 2026</span>
+                <span class="profile-sep">•</span>
+                <a class="profile-link" href="{{ url('/#/about') }}">Tentang Kami</a>
+            </div>
+            <p class="profile-note">Pengenalan gestur lewat kamera berupa simulasi, dan kamus BISINDO.</p>
+        </footer>
     </main>
 </body>
 </html>
