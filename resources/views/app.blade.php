@@ -58,18 +58,21 @@
     <footer class="site-footer">
         <div class="footer-wrap">
             <div class="footer-left">
-                <span class="meta cy">SIGNESIA | SIGN LANGUAGE</span>
+                <span class="footer-brand"><span class="brand-title">SIGNESIA</span> <span class="brand-sep">•</span> <span class="brand-sub">SIGN LANGUAGE</span></span>
                 <p class="footer-desc">Pengenalan gestur lewat kamera berupa simulasi, dan kamus BISINDO.</p>
-                <a class="footer-link" href="#/about">Tentang kami</a>
+                <div class="footer-link-group">
+                    <span class="footer-link-sep" aria-hidden="true">•</span>
+                    <a class="footer-link" href="#/about">Tentang kami</a>
+                </div>
             </div>
             <div class="footer-meta-grid">
                 <div>
-                    <span class="meta">BELAJAR,</span>
-                    <span class="val"></span>
+                    <span class="meta">BELAJAR</span>
+                    <span class="val">4 KATEGORI</span>
                 </div>
                 <div>
                     <span class="meta">LATIHAN</span>
-                    <span class="val"></span>
+                    <span class="val">KAMERA AI</span>
                 </div>
                 <div>
                     <span class="meta">KAMUS</span>
