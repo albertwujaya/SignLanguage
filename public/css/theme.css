@@ -1900,6 +1900,173 @@ header #sb:hover { color: var(--ink); }
     .about-contact > div { grid-template-columns: 1fr; gap: 2px; padding: 14px 18px; }
 }
 
+@media (max-width: 640px) {
+    /* About Us: Clean & Modern ala Mobile App */
+    .about {
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    .about .page-header {
+        margin-bottom: 0 !important;
+        padding-bottom: 2px !important;
+    }
+    .about .page-header .big {
+        font-size: 28px !important;
+        line-height: 1.15 !important;
+        margin: 2px 0 6px !important;
+    }
+    .about-lead {
+        font-size: 14.5px !important;
+        line-height: 1.35 !important;
+        margin: 4px 0 0 !important;
+        max-width: 100% !important;
+    }
+    .about-block {
+        margin-top: 20px !important;
+    }
+    .about-intro {
+        margin-top: 12px !important;
+    }
+    .about-block > h2 {
+        font-size: 17px !important;
+        margin: 0 0 10px !important;
+    }
+    .about-text {
+        font-size: 13px !important;
+        line-height: 1.55 !important;
+        margin: 0 0 8px !important;
+        max-width: 100% !important;
+    }
+
+    /* Cards Fitur: Grid 2x2 Kompak */
+    .about-features {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+    .about-card {
+        padding: 12px 10px !important;
+        gap: 6px !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 14px !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+    .about-card h3 {
+        font-size: 15.5px !important;
+        margin: 0 !important;
+    }
+    .about-card p {
+        font-size: 11px !important;
+        line-height: 1.35 !important;
+        margin: 0 0 6px !important;
+        color: var(--t2) !important;
+    }
+    .about-card .btn.sm {
+        width: 100% !important;
+        height: 32px !important;
+        min-height: 32px !important;
+        padding: 0 8px !important;
+        font-size: 10.5px !important;
+        letter-spacing: 0.02em !important;
+        border-radius: 999px !important;
+        border-width: 1.5px !important;
+        box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+        justify-content: center !important;
+    }
+
+    /* Catatan Status */
+    .about-note {
+        padding: 14px 14px !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 14px !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
+        transform: none !important;
+    }
+    .about-note::before {
+        top: -10px !important;
+        width: 72px !important;
+        height: 18px !important;
+        margin-left: -36px !important;
+        border-width: 1.5px !important;
+    }
+    .about-note h2 {
+        font-size: 16px !important;
+        margin: 0 0 8px !important;
+    }
+    .about-note dl {
+        gap: 6px !important;
+        margin: 0 0 8px !important;
+    }
+    .about-note dl > div {
+        grid-template-columns: 1fr !important;
+        gap: 1px !important;
+    }
+    .about-note dt {
+        font-size: 10.5px !important;
+        letter-spacing: 0.05em !important;
+    }
+    .about-note dd {
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+    }
+    .about-note > p {
+        font-size: 11.5px !important;
+        line-height: 1.4 !important;
+        padding-top: 8px !important;
+    }
+
+    /* Tim Kami: List Kompak ala Mobile */
+    .about-team {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+    .about-member {
+        padding: 10px 12px !important;
+        gap: 12px !important;
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 12px !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
+    }
+    .about-avatar {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 16px !important;
+        border-width: 1.5px !important;
+        flex: 0 0 36px !important;
+    }
+    .about-member strong {
+        font-size: 14.5px !important;
+        line-height: 1.2 !important;
+        margin-bottom: 2px !important;
+    }
+    .about-member span:not(.about-avatar) {
+        font-size: 11.5px !important;
+        line-height: 1.35 !important;
+        display: block !important;
+        color: var(--t2) !important;
+    }
+
+    /* Kontak */
+    .about-contact {
+        border: 1.5px solid var(--ink) !important;
+        border-radius: 12px !important;
+        box-shadow: 2px 2px 0 var(--ink) !important;
+    }
+    .about-contact > div {
+        padding: 10px 14px !important;
+        gap: 2px !important;
+    }
+    .about-contact dt {
+        font-size: 11px !important;
+    }
+    .about-contact dd {
+        font-size: 12.5px !important;
+    }
+}
+
 /* ABOUT: catatan status & kontak dirata-tengah (judul ikut ke tengah) */
 .about-note { margin-left: auto; margin-right: auto; }
 .about-note h2 { text-align: center; }
