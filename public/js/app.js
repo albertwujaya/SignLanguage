@@ -42,7 +42,15 @@
     const $$ = (s, r = document) => [...r.querySelectorAll(s)];
     const pad = n => String(n).padStart(2, '0');
     const escapeHtml = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    const byCat = c => GESTURES.filter(g => g.c === c);
+    const sortGestures = arr => [...arr].sort((a, b) => {
+        const sa = Number(a.sort_order ?? 0);
+        const sb = Number(b.sort_order ?? 0);
+        if (sa > 0 && sb > 0 && sa !== sb) return sa - sb;
+        if (sa > 0 && (!sb || sb === 0)) return -1;
+        if (sb > 0 && (!sa || sa === 0)) return 1;
+        return (a.w || '').localeCompare(b.w || '', undefined, { sensitivity: 'base' });
+    });
+    const byCat = c => sortGestures(GESTURES.filter(g => g.c === c));
     // Teks arti utama = bahasa Indonesia (BISINDO). Bahasa Inggris hanya pendamping kecil.
     const idw = g => (g && (g.id_word || g.w)) || '';
     const enw = g => (g && g.id_word && g.id_word !== g.w) ? g.w : '';
@@ -56,7 +64,7 @@
     // Filter jenjang belajar (abjad / kata / kalimat) untuk halaman Learn
     let learnLevel = 'all';
     const LEVEL_LABELS = { abjad: 'ABJAD', angka: 'ANGKA', kata: 'KATA', kalimat: 'KALIMAT' };
-    const byCatL = c => GESTURES.filter(g => g.c === c && (learnLevel === 'all' || g.level === learnLevel));
+    const byCatL = c => sortGestures(GESTURES.filter(g => g.c === c && (learnLevel === 'all' || g.level === learnLevel)));
 
     // Audio Feedback Generator using Web Audio API
     function playBeep(type = 'success') {
@@ -2527,7 +2535,7 @@
                 b.classList.toggle('is-active', b.dataset.filter === activeFilter);
             });
 
-            const filtered = GESTURES.filter(g => {
+            const filtered = sortGestures(GESTURES.filter(g => {
                 const matchesFilter = (activeFilter === 'all' || g.c === activeFilter);
                 const q = searchQuery.toLowerCase().trim();
                 const matchesSearch = !q ||
@@ -2536,7 +2544,7 @@
                     (g.desc && g.desc.toLowerCase().includes(q)) ||
                     CN[g.c].toLowerCase().includes(q);
                 return matchesFilter && matchesSearch;
-            });
+            }));
 
             if (!filtered.length) {
                 container.innerHTML = `

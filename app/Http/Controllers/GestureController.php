@@ -31,6 +31,7 @@ class GestureController extends Controller
                 $q->where('level', $request->level);
             })
             ->orderBy('sort_order')
+            ->orderBy('word')
             ->orderBy('id')
             ->get();
 
@@ -57,6 +58,7 @@ class GestureController extends Controller
             'video' => $g->video_url,
             'level' => $g->level,
             'status' => $g->status,
+            'sort_order' => (int) $g->sort_order,
             'image' => $g->imageUrl(),
             'video_file' => $g->videoFileUrl(),
         ];
