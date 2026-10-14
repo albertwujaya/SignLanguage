@@ -1245,10 +1245,8 @@
                     <div class="feat-content">
                         <div class="meta cy">${f.num} / ${f.tag}</div>
                         <h2 class="h2">${f.title}</h2>
-                        <p class="feat-desc-desktop">
-                            ${f.desc}
-                        </p>
-                        <a href="${f.link}" class="btn">EXPLORE ${f.tag}</a>
+                        <p class="feat-desc-desktop">${f.desc}</p>
+                        <a href="${f.link}" class="btn">EXPLORE</a>
                     </div>
                     <a href="${f.link}" class="feat-visual" aria-label="Open ${f.tag} Module">
                         <img src="${f.img}" alt="${f.title} visual demonstration" loading="lazy">
@@ -2652,7 +2650,10 @@
         modal.innerHTML = `
         <div class="modal-box" role="dialog" aria-modal="true" aria-label="${idw(gesture)} details">
             <div class="modal-top-bar">
-                <span class="pill cyan">${CN[gesture.c] || gesture.c}</span>
+                <div class="modal-heading-group">
+                    <span class="pill cyan">${CN[gesture.c] || gesture.c}</span>
+                    <h2 class="modal-title">${idw(gesture)}</h2>
+                </div>
                 <button class="clear-search-btn" id="modal-close-btn" aria-label="Close dialog">✕</button>
             </div>
 
@@ -2664,8 +2665,7 @@
             </div>
 
             <div class="modal-info-side">
-                <h2>${idw(gesture)}</h2>
-                ${enw(gesture) ? `<div class="meta cy" style="margin-bottom: 18px;">ENGLISH: ${enw(gesture)}</div>` : ''}
+                ${enw(gesture) ? `<div class="meta cy" style="margin-bottom: 14px;">ENGLISH: ${enw(gesture)}</div>` : ''}
 
                 <div class="modal-detail-row">
                     <span class="meta cy">DESCRIPTION</span>

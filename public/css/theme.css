@@ -119,7 +119,20 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
     align-items: center;
     width: 100%;
     grid-column: 1 / -1;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+}
+.modal-heading-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0;
+    color: var(--ink);
 }
 /* ilustrasi vektor gerakan: warna neon -> palet hangat */
 .sign-svg-diagram [stroke="#18D8D0" i], .modal-visual-side [stroke="#18D8D0" i] { stroke: #C0432B; }
@@ -150,20 +163,21 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 6px 0;
 }
 .modal-visual-side .gesture-media-video, .modal-visual-side .gesture-media-image {
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
     max-height: 250px;
     aspect-ratio: 16 / 9;
-    object-fit: cover;
+    object-fit: contain;
     border: 2px solid var(--ink);
     border-radius: 16px;
     box-shadow: 3.5px 3.5px 0 var(--ink);
     background: #181411;
 }
 .modal-media-label {
-    margin-top: 10px;
+    margin-top: 8px;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.08em;
@@ -621,13 +635,13 @@ nav.top a::after { display: none; }
     .scroll-indicator { display: none; }
     .hero::after { height: 22%; }
 
-    /* Kartu fitur di Mobile: Grid 2x2 Kompak */
+    /* Kartu fitur di Mobile: Grid 2x2 Kompak & Konsisten (Gambar Selalu di Atas) */
     .feature-editorial-list {
         display: grid !important;
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 12px !important;
         padding-top: 24px !important;
-        padding-bottom: 36px !important;
+        padding-bottom: calc(108px + env(safe-area-inset-bottom, 0px)) !important;
     }
     .feat-item {
         display: flex !important;
@@ -645,10 +659,11 @@ nav.top a::after { display: none; }
         transform: translate(-1.5px, -1.5px) !important;
         box-shadow: 4.5px 4.5px 0 var(--ink) !important;
     }
-    .feat-item .feat-num {
+    .feat-num {
         display: none !important;
     }
-    .feat-item .feat-visual {
+    .feat-item .feat-visual,
+    .feat-item:nth-child(even) .feat-visual {
         order: 1 !important;
         width: 100% !important;
         aspect-ratio: 4 / 3 !important;
@@ -658,15 +673,18 @@ nav.top a::after { display: none; }
         box-shadow: 2px 2px 0 var(--ink) !important;
         margin: 0 !important;
     }
-    .feat-item .feat-visual img {
+    .feat-item .feat-visual img,
+    .feat-item:nth-child(even) .feat-visual img {
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
     }
-    .feat-item .feat-visual-overlay {
+    .feat-item .feat-visual-overlay,
+    .feat-item:nth-child(even) .feat-visual-overlay {
         display: none !important;
     }
-    .feat-item .feat-content {
+    .feat-item .feat-content,
+    .feat-item:nth-child(even) .feat-content {
         order: 2 !important;
         display: flex !important;
         flex-direction: column !important;
@@ -886,7 +904,7 @@ nav.top a::after { display: none; }
     .modal { padding: 12px; align-items: flex-start; }
     .modal.on { align-items: flex-start; }
     .modal-box {
-        padding: 16px !important;
+        padding: 18px 16px !important;
         gap: 12px !important;
         max-height: calc(100svh - 24px) !important;
         box-shadow: 4px 4px 0 var(--ink) !important;
@@ -898,11 +916,21 @@ nav.top a::after { display: none; }
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        margin-bottom: 2px !important;
+        margin-bottom: 8px !important;
+    }
+    .modal-heading-group {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        flex-wrap: wrap !important;
+    }
+    .modal-title {
+        font-size: 22px !important;
+        margin: 0 !important;
     }
     .modal-visual-side {
         min-height: 0 !important;
-        padding: 0 !important;
+        padding: 4px 0 0 !important;
         background: transparent !important;
         border: none !important;
         width: 100% !important;
@@ -911,25 +939,32 @@ nav.top a::after { display: none; }
         width: 100% !important;
         border-radius: 14px !important;
         overflow: hidden !important;
+        margin-top: 4px !important;
+        background: #181411 !important;
     }
     .modal-visual-side .gesture-media-video,
     .modal-visual-side .gesture-media-image {
         width: 100% !important;
-        max-height: 200px !important;
-        aspect-ratio: 16 / 9 !important;
-        object-fit: cover !important;
+        max-height: 220px !important;
+        aspect-ratio: 16 / 10 !important;
+        object-fit: contain !important;
         border: 2px solid var(--ink) !important;
         border-radius: 14px !important;
         box-shadow: 3px 3px 0 var(--ink) !important;
         background: #181411 !important;
+        display: block !important;
+    }
+    .modal-visual-side svg.modal-gesture-media {
+        max-height: 180px !important;
+        width: 100% !important;
     }
     .modal-media-label {
-        margin-top: 6px !important;
+        margin-top: 8px !important;
         font-size: 10px !important;
         letter-spacing: 0.06em !important;
     }
     .modal-info-side h2 {
-        font-size: clamp(26px, 8vw, 36px) !important;
+        font-size: clamp(24px, 7vw, 32px) !important;
         margin: 6px 0 10px !important;
     }
     .modal-actions { gap: 8px; margin-top: 14px; }
