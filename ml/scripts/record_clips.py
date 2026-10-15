@@ -48,7 +48,11 @@ landmarker = vision.HandLandmarker.create_from_options(
         num_hands=2,
     )
 )
-cap = cv2.VideoCapture(CAM)
+cap = cv2.VideoCapture(CAM, cv2.CAP_DSHOW) if sys.platform.startswith('win') else cv2.VideoCapture(CAM)
+if not cap.isOpened():
+    cap = cv2.VideoCapture(CAM)
+if not cap.isOpened():
+    sys.exit(f"Kamera ({CAM}) tidak dapat dibuka. Pastikan tidak sedang digunakan oleh browser atau aplikasi lain, atau coba kamera lain dengan menambahkan angka 1 di akhir perintah.")
 t0 = time.monotonic()
 idx = 0
 state, count_end, rec_end = "idle", 0.0, 0.0
