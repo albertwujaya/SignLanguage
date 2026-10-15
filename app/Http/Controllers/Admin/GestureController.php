@@ -214,14 +214,16 @@ class GestureController extends Controller
 
     public function completeness(): View
     {
-        $levelsSummary = collect(Gesture::LEVELS)->map(function (string $label, string $key) {
-            $total = Gesture::where('level', $key)->count();
-            $complete = Gesture::where('level', $key)
-                ->whereNotNull('image_path')
-                ->whereNotNull('video_path')
-                ->whereNotNull('description')
-                ->where('description', '!=', '')
-                ->count();
+        $stats = Gesture::selectRaw("
+            level,
+            count(*) as total,
+            sum(case when image_path is not null and video_path is not null and description is not null and description != '' then 1 else 0 end) as complete
+        ")->groupBy('level')->get()->keyBy('level');
+
+        $levelsSummary = collect(Gesture::LEVELS)->map(function (string $label, string $key) use ($stats) {
+            $row = $stats->get($key);
+            $total = (int) ($row?->total ?? 0);
+            $complete = (int) ($row?->complete ?? 0);
 
             return [
                 'key' => $key,
@@ -234,6 +236,7 @@ class GestureController extends Controller
         });
 
         $incompleteGestures = Gesture::query()
+            ->select(['id', 'word', 'slug', 'level', 'status', 'image_path', 'video_path', 'description'])
             ->where(function ($q): void {
                 $q->whereNull('image_path')
                     ->orWhereNull('video_path')

@@ -7,6 +7,10 @@
     <title>@yield('title') | Signesia Admin</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/logo.svg') }}">
     <link rel="alternate icon" href="{{ asset('favicon.ico') }}">
+    {{-- Preload primary fonts for zero layout shift (CLS) & instant render --}}
+    <link rel="preload" href="{{ asset('fonts/fredoka-700.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ asset('fonts/nunito-400.woff2') }}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{{ asset('fonts/nunito-700.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 </head>

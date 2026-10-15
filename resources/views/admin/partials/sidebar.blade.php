@@ -33,18 +33,15 @@
                 $isAngka = request()->routeIs('admin.gestures.*') && request('level') === 'angka';
                 $isAbjad = request()->routeIs('admin.gestures.*') && request('level') === 'abjad';
 
-                // Helper counts
-                $cntKataPub = \App\Models\Gesture::where('level', 'kata')->published()->count();
-                $cntKataDraft = \App\Models\Gesture::where('level', 'kata')->where('status', 'draft')->count();
-
-                $cntKalimatPub = \App\Models\Gesture::where('level', 'kalimat')->published()->count();
-                $cntKalimatDraft = \App\Models\Gesture::where('level', 'kalimat')->where('status', 'draft')->count();
-
-                $cntAngkaPub = \App\Models\Gesture::where('level', 'angka')->published()->count();
-                $cntAngkaDraft = \App\Models\Gesture::where('level', 'angka')->where('status', 'draft')->count();
-
-                $cntAbjadPub = \App\Models\Gesture::where('level', 'abjad')->published()->count();
-                $cntAbjadDraft = \App\Models\Gesture::where('level', 'abjad')->where('status', 'draft')->count();
+                // Helper counts injected from AdminSidebarComposer
+                $cntKataPub = $cntKataPub ?? 0;
+                $cntKataDraft = $cntKataDraft ?? 0;
+                $cntKalimatPub = $cntKalimatPub ?? 0;
+                $cntKalimatDraft = $cntKalimatDraft ?? 0;
+                $cntAngkaPub = $cntAngkaPub ?? 0;
+                $cntAngkaDraft = $cntAngkaDraft ?? 0;
+                $cntAbjadPub = $cntAbjadPub ?? 0;
+                $cntAbjadDraft = $cntAbjadDraft ?? 0;
             @endphp
 
             <a href="{{ route('admin.gestures.index', ['level' => 'kata']) }}" @class(['nav-link', 'active' => $isKata]) @if($isKata) aria-current="page" @endif>
@@ -95,8 +92,8 @@
                 @php
                     $isStaffTab = request()->routeIs('admin.users.*') && request('tab') === 'staff';
                     $isStudentsTab = request()->routeIs('admin.users.*') && request('tab') !== 'staff';
-                    $totalStaff = \App\Models\User::whereIn('role', ['admin', 'editor'])->count();
-                    $totalStudents = \App\Models\User::where('role', 'student')->count();
+                    $totalStaff = $totalStaff ?? 0;
+                    $totalStudents = $totalStudents ?? 0;
                 @endphp
                 <a href="{{ route('admin.users.index', ['tab' => 'staff']) }}" @class(['nav-link', 'active' => $isStaffTab]) @if($isStaffTab) aria-current="page" @endif>
                     <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>

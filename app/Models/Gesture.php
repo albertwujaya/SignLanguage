@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 #[Fillable([
@@ -112,5 +113,17 @@ class Gesture extends Model
         }
 
         return Storage::disk('public')->url($this->video_path);
+    }
+
+    protected static function booted(): void
+    {
+        $clearCache = static function (): void {
+            Cache::forget('admin_sidebar_counts');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+        static::restored($clearCache);
+        static::forceDeleted($clearCache);
     }
 }

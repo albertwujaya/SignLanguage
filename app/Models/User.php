@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 
 #[Fillable(['name', 'email', 'password', 'role', 'last_active_at'])]
 #[Hidden(['password', 'remember_token'])]
@@ -60,5 +61,15 @@ class User extends Authenticatable
             'last_active_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        $clearCache = static function (): void {
+            Cache::forget('admin_sidebar_counts');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
     }
 }

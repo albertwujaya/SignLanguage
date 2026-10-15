@@ -16,38 +16,56 @@ class DashboardController extends Controller
     public function index(): View
     {
         $totalUsers = User::count();
-        $activeThisWeek = User::where(function ($q) {
+        $activeThisWeek = User::where(function ($q): void {
             $q->where('last_active_at', '>=', now()->subDays(7))
                 ->orWhere('updated_at', '>=', now()->subDays(7));
         })->count();
 
-        $totalPublishedGestures = Gesture::published()->count();
+        // Ambil status gesture dalam 1 query terkelompok
+        $gestureStatusCounts = Gesture::query()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $totalPublishedGestures = (int) ($gestureStatusCounts[Gesture::STATUS_PUBLISHED] ?? 0);
+        $totalDraftGestures = (int) ($gestureStatusCounts[Gesture::STATUS_DRAFT] ?? 0);
+        $totalTrashedGestures = Gesture::onlyTrashed()->count();
 
         // Rata-rata progres pengguna
         $avgProgressPercent = 0;
         if ($totalUsers > 0 && $totalPublishedGestures > 0) {
             $totalLearnedAll = GestureProgress::whereNotNull('learned_at')
-                ->whereHas('gesture', fn ($q) => $q->published())
+                ->whereExists(function ($sub): void {
+                    $sub->selectRaw(1)
+                        ->from('gestures')
+                        ->whereColumn('gestures.id', 'gesture_progress.gesture_id')
+                        ->where('gestures.status', Gesture::STATUS_PUBLISHED)
+                        ->whereNull('gestures.deleted_at');
+                })
                 ->count();
             $avgProgressPercent = round(($totalLearnedAll / ($totalUsers * $totalPublishedGestures)) * 100, 1);
         }
 
-        $totalSessions = PracticeSession::count();
-        $avgScore = round((float) PracticeSession::avg('score'), 1);
+        // Ambil sesi dan rata-rata skor dalam 1 query gabungan
+        $sessionStats = PracticeSession::selectRaw('count(*) as total, avg(score) as avg_score')->first();
+        $totalSessions = (int) ($sessionStats->total ?? 0);
+        $avgScore = round((float) ($sessionStats->avg_score ?? 0), 1);
 
         $gestureStats = [
-            'total' => Gesture::count(),
+            'total' => $totalPublishedGestures + $totalDraftGestures,
             'published' => $totalPublishedGestures,
-            'draft' => Gesture::where('status', Gesture::STATUS_DRAFT)->count(),
-            'trashed' => Gesture::onlyTrashed()->count(),
+            'draft' => $totalDraftGestures,
+            'trashed' => $totalTrashedGestures,
         ];
 
-        // Kelengkapan konten ringkas
+        // Kelengkapan konten ringkas (dikelompokkan agar aman terhadap soft deletes dan efisien)
         $incompleteCount = Gesture::query()
-            ->whereNull('image_path')
-            ->orWhereNull('video_path')
-            ->orWhereNull('description')
-            ->orWhere('description', '')
+            ->where(function ($q): void {
+                $q->whereNull('image_path')
+                    ->orWhereNull('video_path')
+                    ->orWhereNull('description')
+                    ->orWhere('description', '');
+            })
             ->count();
 
         // Gesture tersulit ringkas (min 3 attempt)
@@ -59,11 +77,11 @@ class DashboardController extends Controller
             ->havingRaw('count(*) >= ?', [3])
             ->orderBy('accuracy', 'asc')
             ->limit(5)
-            ->with('gesture')
+            ->with(['gesture' => fn ($q) => $q->select('id', 'word', 'slug')])
             ->get();
 
-        // Aktivitas admin terkini
-        $recentLogs = AdminActivityLog::with('user')->latest()->limit(5)->get();
+        // Aktivitas admin terkini (hanya pilih atribut yang diperlukan)
+        $recentLogs = AdminActivityLog::with('user:id,name,role')->latest()->limit(5)->get();
 
         return view('admin.dashboard', [
             'totalUsers' => $totalUsers,
