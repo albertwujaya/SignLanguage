@@ -49,16 +49,16 @@ nav.top a { color: var(--ink); font-weight: 800; border-radius: 999px; padding: 
 nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); box-shadow: inset 0 0 0 2px var(--ink); }
 
 /* ---- Tombol & chip chunky ---- */
-.btn, .ibtn, .pill, .kbd-hint, .header-status-pill, .hd-auth-link, .dict-filter-btn, .translate-tab-btn, .ov-tag, .level-tab {
+.btn, .ibtn, .pill, .kbd-hint, .header-status-pill, .hd-auth-link, .dict-filter-btn, .ov-tag, .level-tab {
     background: var(--paper); color: var(--ink); border: 2.5px solid var(--ink); border-radius: 999px;
     box-shadow: 3px 3px 0 var(--ink); font-family: var(--font-body); font-weight: 800; opacity: 1;
     transition: transform .15s cubic-bezier(.3,1.6,.5,1), box-shadow .15s;
 }
-.btn:hover, .ibtn:hover, .dict-filter-btn:hover, .translate-tab-btn:hover, .ov-tag:hover, .hd-auth-link:hover, .level-tab:hover {
+.btn:hover, .ibtn:hover, .dict-filter-btn:hover, .ov-tag:hover, .hd-auth-link:hover, .level-tab:hover {
     transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--ink); background: var(--paper);
 }
 .btn:active, .ibtn:active, .hd-auth-link:active, .level-tab:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
-.btn.p, .hd-auth-cta, .dict-filter-btn.on, .dict-filter-btn.active, .translate-tab-btn.on, .translate-tab-btn.active, .level-tab.on {
+.btn.p, .hd-auth-cta, .dict-filter-btn.on, .dict-filter-btn.active, .level-tab.on {
     background: var(--mustard); color: var(--ink);
 }
 .pill.cyan { background: var(--sage); color: var(--ink); }
@@ -70,7 +70,7 @@ nav.top a:hover, nav.top a.on, nav.top a.active { background: var(--mustard); bo
 
 /* ---- Kartu = kertas tempel ---- */
 .cat-row, .gesture-card-item, .flip-face, .lesson-step-block, .feat-item, .practice-target-card, .cam-result-card,
-.stat-cell, .modal-box, .translate-tabs, .sentence-builder-tray, .tts-field-group {
+.stat-cell, .modal-box, .sentence-builder-tray, .tts-field-group {
     background: var(--paper); color: var(--ink); border: 2.5px solid var(--ink); border-radius: var(--radius-lg);
     box-shadow: 5px 5px 0 var(--ink); backdrop-filter: none;
 }
@@ -601,20 +601,69 @@ nav.top a::after { display: none; }
 .cam-controls-bar { flex-wrap: wrap; }
 #btn-force-match { border-color: var(--ink) !important; }
 
-/* ---- Tab terjemahan ---- */
+/* ---- Tab terjemahan (Segmented Control: Clean & No Outline Clash) ---- */
 .translate-tabs {
-    display: flex;
-    width: 100%;
-    max-width: 100%;
-    margin-bottom: 24px !important;
+    display: flex !important;
+    align-items: center;
+    background: var(--bg-surface, #F3E8CE) !important;
+    border: 2px solid var(--ink) !important;
+    border-radius: 999px !important;
+    box-shadow: 3px 3px 0 var(--ink) !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    margin: 0 auto 24px !important;
+    width: 100% !important;
+    max-width: 680px !important;
+    box-sizing: border-box !important;
 }
-.translate-tab-btn { flex: 1 1 auto; }
+.translate-tab-btn {
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    min-height: 40px !important;
+    height: 40px !important;
+    padding: 8px 12px !important;
+    border-radius: 999px !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background: transparent !important;
+    color: var(--t2) !important;
+    font-family: var(--font-heading) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    white-space: nowrap !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 0.18s cubic-bezier(0.2, 0.8, 0.3, 1) !important;
+}
+.translate-tab-btn:hover:not(.is-active) {
+    background: rgba(43, 33, 24, 0.06) !important;
+    color: var(--ink) !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+.translate-tab-btn.is-active {
+    background: var(--mustard) !important;
+    color: var(--ink) !important;
+    font-weight: 800 !important;
+    border: 1.5px solid var(--ink) !important;
+    box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+    transform: none !important;
+}
 
 /* ============================ TABLET ============================ */
 @media (max-width: 1024px) {
     .feat-num { display: none; }
     .feat-visual, .feat-item:nth-child(even) .feat-visual { order: 3; }
     .hero-grid { gap: 20px; }
+    .translate-tabs { max-width: 580px !important; }
+    .translate-tab-btn { font-size: 11px !important; padding: 7px 6px !important; letter-spacing: 0.02em !important; }
 }
 
 /* ============================ HP ============================ */
@@ -928,29 +977,34 @@ nav.top a::after { display: none; }
     .cam-result-card { left: 8px !important; right: 8px !important; bottom: 8px !important; padding: 6px 10px !important; gap: 6px !important; }
     .session-stats-grid { grid-template-columns: 1fr; gap: 14px; padding: 20px 0; margin: 24px 0; }
 
-    /* Terjemah: Tab Navigasi Segmented Modern & Ramping */
+    /* Terjemah: Tab Navigasi Segmented Khusus Mobile (Teks Kecil Pas & Tanpa Outline Bertabrakan) */
     .translate-tabs {
         display: flex !important;
-        background: var(--bg3) !important;
+        align-items: center !important;
+        background: var(--bg-surface, #F3E8CE) !important;
         border: 1.5px solid var(--ink) !important;
         border-radius: 999px !important;
         box-shadow: 2px 2px 0 var(--ink) !important;
         padding: 3px !important;
-        gap: 3px !important;
+        gap: 2px !important;
         margin-bottom: 14px !important;
         width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
     .translate-tab-btn {
         flex: 1 1 0 !important;
+        width: 0 !important;
         min-width: 0 !important;
         padding: 6px 2px !important;
-        font-size: 9.5px !important;
-        letter-spacing: 0.02em !important;
+        font-size: 9px !important;
+        letter-spacing: 0 !important;
         min-height: 32px !important;
         height: 32px !important;
         border-radius: 999px !important;
         border: none !important;
         box-shadow: none !important;
+        outline: none !important;
         background: transparent !important;
         color: var(--t2) !important;
         font-weight: 700 !important;
@@ -959,12 +1013,22 @@ nav.top a::after { display: none; }
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        overflow: hidden !important;
+        text-overflow: clip !important;
+    }
+    .translate-tab-btn:hover:not(.is-active) {
+        border: none !important;
+        box-shadow: none !important;
+        background: rgba(43, 33, 24, 0.05) !important;
+        transform: none !important;
     }
     .translate-tab-btn.is-active {
         background: var(--mustard) !important;
         color: var(--ink) !important;
+        font-weight: 800 !important;
         border: 1.5px solid var(--ink) !important;
-        box-shadow: 1.5px 1.5px 0 var(--ink) !important;
+        box-shadow: 1px 1px 0 var(--ink) !important;
+        transform: none !important;
     }
 
     /* Viewport Kamera Terjemahan & Latihan: Luas (16:9), Ditengah (Center), Nyaman di Mobile */
@@ -1666,6 +1730,8 @@ nav.top a::after { display: none; }
 @media (max-width: 360px) {
     .logo-text { font-size: 15px !important; letter-spacing: .02em !important; }
     .hd-auth-link { padding: 5px 8px; font-size: 10px; }
+    .translate-tabs { padding: 2px !important; gap: 1.5px !important; }
+    .translate-tab-btn { font-size: 8px !important; height: 28px !important; min-height: 28px !important; padding: 4px 1px !important; letter-spacing: 0 !important; }
 }
 
 /* Kolom pencarian: input polos (tanpa kotak di dalam kotak), tombol ✕ hanya muncul saat ada teks */
