@@ -2243,6 +2243,33 @@ header #sb:hover { color: var(--ink); }
     -webkit-backdrop-filter: blur(16px);
     padding: clamp(24px, 5vw, 64px) 20px;
     z-index: 1000 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(43, 33, 24, 0.25) transparent;
+}
+
+.ov.on {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.ov::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ov::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.ov::-webkit-scrollbar-thumb {
+    background: rgba(43, 33, 24, 0.25);
+    border-radius: 999px;
+}
+
+.ov::-webkit-scrollbar-thumb:hover {
+    background: var(--mustard);
 }
 
 .ov-inner {
@@ -2446,34 +2473,30 @@ header #sb:hover { color: var(--ink); }
     border-radius: 999px;
 }
 
-/* Results List with custom sleek scrollbar */
+/* Results List - No internal scrollbar, outer edge scrollbar handles all scrolling */
 .search-results-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: min(54vh, 480px);
-    overflow-y: auto;
-    padding-right: 6px;
-    padding-bottom: 8px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(43, 33, 24, 0.22) transparent;
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    padding-right: 0;
+    padding-bottom: 24px;
+    scrollbar-width: none !important;
 }
 
 .search-results-list::-webkit-scrollbar {
-    width: 6px;
+    display: none !important;
+    width: 0 !important;
 }
 
 .search-results-list::-webkit-scrollbar-track {
-    background: transparent;
+    display: none !important;
 }
 
 .search-results-list::-webkit-scrollbar-thumb {
-    background: rgba(43, 33, 24, 0.22);
-    border-radius: 999px;
-}
-
-.search-results-list::-webkit-scrollbar-thumb:hover {
-    background: var(--mustard);
+    display: none !important;
 }
 
 /* Clean, Sleek, Refined Result Items */

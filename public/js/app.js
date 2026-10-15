@@ -2762,6 +2762,7 @@
 
     function openSearch() {
         if (!searchOverlay) return;
+        document.body.style.overflow = 'hidden';
         searchOverlay.classList.add('on');
         searchInput.value = '';
         renderSearchResults('');
@@ -2770,6 +2771,7 @@
 
     function closeSearch() {
         if (searchOverlay) searchOverlay.classList.remove('on');
+        document.body.style.overflow = '';
     }
 
     function renderSearchResults(query) {
@@ -2886,6 +2888,11 @@
     if (searchTrigger) searchTrigger.onclick = openSearch;
     const searchClose = $('#so-close');
     if (searchClose) searchClose.onclick = closeSearch;
+    if (searchOverlay) {
+        searchOverlay.addEventListener('click', e => {
+            if (e.target === searchOverlay) closeSearch();
+        });
+    }
     if (searchClear) searchClear.onclick = () => {
         searchInput.value = '';
         renderSearchResults('');

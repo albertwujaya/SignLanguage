@@ -1763,8 +1763,8 @@ main {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 50vh;
-    overflow-y: auto;
+    max-height: none;
+    overflow-y: visible;
 }
 
 .search-result-item {
