@@ -92,19 +92,25 @@
     </nav>
 
     <!-- Global Cinematic Search Modal Overlay -->
-    <div class="ov" id="so" role="dialog" aria-modal="true" aria-label="Search gesture platform">
+    <div class="ov" id="so" role="dialog" aria-modal="true" aria-label="Penelusuran Isyarat Signesia">
         <div class="ov-inner">
             <div class="ov-top-bar">
-                <span class="meta cy">SEARCH SIGN LANGUAGE DATABASE</span>
-                <button type="button" class="ov-close" id="so-close" aria-label="Tutup pencarian">ESC / TUTUP</button>
+                <span class="meta">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    PENELUSURAN DATABASE BISINDO
+                </span>
+                <button type="button" class="ov-close" id="so-close" aria-label="Tutup pencarian">
+                    <span>TUTUP</span>
+                    <kbd class="kbd-hint">ESC</kbd>
+                </button>
             </div>
             <div class="ov-input-box">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <input id="si" placeholder="SEARCH WORDS, GESTURES, OR LESSONS..." aria-label="Search sign language" autocomplete="off" spellcheck="false">
-                <button class="clear-search-btn" id="sc-clear" aria-label="Clear search input">✕</button>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="search-icon" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input id="si" placeholder="Cari kata, isyarat, atau materi BISINDO..." aria-label="Cari isyarat bahasa" autocomplete="off" spellcheck="false">
+                <button class="clear-search-btn" id="sc-clear" aria-label="Hapus kata kunci" title="Hapus">✕</button>
             </div>
             <div class="ov-filters">
-                <span class="meta">POPULAR:</span>
+                <span class="meta">POPULER:</span>
                 <button type="button" class="ov-tag" data-tag="halo">HALO</button>
                 <button type="button" class="ov-tag" data-tag="terima kasih">TERIMA KASIH</button>
                 <button type="button" class="ov-tag" data-tag="tolong">TOLONG</button>

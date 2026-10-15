@@ -2778,7 +2778,7 @@
 
         const words = GESTURES.filter(g =>
             !q || g.w.toLowerCase().includes(q) || (g.id_word && g.id_word.toLowerCase().includes(q))
-        ).slice(0, 8);
+        ).slice(0, 15);
 
         const cats = CATS.filter(c =>
             !q || c[1].toLowerCase().includes(q) || c[2].toLowerCase().includes(q)
@@ -2786,8 +2786,10 @@
 
         if (!words.length && !cats.length) {
             searchResults.innerHTML = `
-            <div style="padding: 24px; text-align: center;">
-                <span class="meta">NO RESULTS MATCHING "${query.toUpperCase()}"</span>
+            <div class="search-empty-state">
+                <div class="search-empty-icon">🔍</div>
+                <h4>Tidak ada isyarat yang cocok</h4>
+                <p>Tidak ditemukan hasil untuk "<strong>${escapeHtml(query)}</strong>". Coba kata kunci lain atau pilih tag populer di atas.</p>
             </div>
             `;
             return;
@@ -2796,38 +2798,68 @@
         let html = '';
 
         if (cats.length && q) {
-            html += `<div class="meta cy" style="margin: 8px 0;">LESSON CATEGORIES</div>`;
+            html += `
+            <div class="search-section-header">
+                <div class="search-section-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path></svg>
+                    <span>MODUL BELAJAR</span>
+                </div>
+                <span class="search-section-count">${cats.length} modul</span>
+            </div>
+            `;
             cats.forEach(c => {
                 html += `
                 <button class="search-result-item" data-goto-cat="${c[0]}">
-                    <div>
-                        <b style="font-family: var(--font-heading); font-size: 16px;">${c[1]}</b>
-                        <span style="display: block; color: var(--t2); font-size: 12px;">${c[2]}</span>
+                    <div class="search-res-left">
+                        <div class="search-res-cat-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path><path d="M6 6h10"></path><path d="M6 10h10"></path></svg>
+                        </div>
+                        <div class="search-res-info">
+                            <span class="search-res-word">${escapeHtml(c[1])}</span>
+                            <span class="search-res-sub">${escapeHtml(c[2])}</span>
+                        </div>
                     </div>
-                    <span class="meta cy">LESSONS →</span>
+                    <div class="search-res-right">
+                        <span class="search-res-badge search-badge-lesson">BUKA MODUL</span>
+                        <svg class="search-res-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </div>
                 </button>
                 `;
             });
         }
 
         if (words.length) {
-            html += `<div class="meta cy" style="margin: 12px 0 6px;">RECOGNIZED GESTURES</div>`;
+            html += `
+            <div class="search-section-header">
+                <div class="search-section-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span>KOSAKATA ISYARAT</span>
+                </div>
+                <span class="search-section-count">${words.length} ditemukan</span>
+            </div>
+            `;
             words.forEach(g => {
                 const thumb = g.image
-                    ? `<img src="${escapeHtml(g.image)}" alt="" style="width:28px;height:28px;border-radius:6px;object-fit:cover;border:1.5px solid var(--ink);flex-shrink:0;">`
-                    : `<span style="font-size: 20px;">${g.e || '◇'}</span>`;
+                    ? `<img class="search-thumb" src="${escapeHtml(g.image)}" alt="" loading="lazy">`
+                    : `<div class="search-thumb-emoji">${g.e || '✋'}</div>`;
+
+                const enWord = enw(g);
+                const categoryLabel = CN[g.c] || g.c;
 
                 html += `
                 <button class="search-result-item" data-goto-gesture="${g.id}">
-                    <div style="display: flex; align-items: center; gap: 14px;">
+                    <div class="search-res-left">
                         ${thumb}
-                        <div>
-                            <b style="font-family: var(--font-heading); font-size: 16px;">${idw(g)}</b>
-                            ${enw(g) ? `<span style="color: var(--cy); font-size: 11px; margin-left: 8px;">(${enw(g)})</span>` : ''}
+                        <div class="search-res-info">
+                            <div class="search-res-word-row">
+                                <span class="search-res-word">${escapeHtml(idw(g))}</span>
+                                ${enWord ? `<span class="search-res-en">${escapeHtml(enWord)}</span>` : ''}
+                            </div>
                         </div>
                     </div>
-                    <div style="text-align: right;">
-                        <span class="meta">${CN[g.c] || g.c}</span>
+                    <div class="search-res-right">
+                        <span class="search-res-badge">${escapeHtml(categoryLabel)}</span>
+                        <svg class="search-res-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                     </div>
                 </button>
                 `;
@@ -2897,7 +2929,7 @@
         }
 
         if (matched.length > 0) {
-            let html = '<span class="meta">POPULAR:</span>';
+            let html = '<span class="meta">POPULER:</span>';
             matched.forEach(item => {
                 html += `<button type="button" class="ov-tag" data-tag="${escapeHtml(item.tag)}">${escapeHtml(item.label)}</button>`;
             });
