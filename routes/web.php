@@ -8,6 +8,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GestureController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgressController;
+use App\Models\Gesture;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'app')->name('home');
@@ -33,6 +34,32 @@ Route::get('/storage/gestures/{type}/{filename}', function (string $type, string
                 'Cache-Control' => 'public, max-age=31536000, immutable',
                 'Access-Control-Allow-Origin' => '*',
             ]);
+        }
+    }
+
+    // Fallback cerdas: Jika file upload fisik tidak ada di disk (misal di Vercel serverless),
+    // cari gesture yang mereferensikan file ini lalu sajikan asset publik berdasarkan slug-nya
+    $column = $type === 'images' ? 'image_path' : 'video_path';
+    $gesture = Gesture::where($column, 'like', "%{$filename}")->first();
+    if ($gesture && $gesture->slug) {
+        $ext = pathinfo($filename, PATHINFO_EXTENSION) ?: ($type === 'images' ? 'webp' : 'mp4');
+        $slugCandidates = [
+            public_path("images/gestures/{$type}/{$gesture->slug}.{$ext}"),
+            public_path("images/gestures/{$type}/".str_replace('-', '_', $gesture->slug).".{$ext}"),
+            public_path("images/gestures/{$type}/".str_replace('_', '-', $gesture->slug).".{$ext}"),
+        ];
+        foreach ($slugCandidates as $slugPath) {
+            if (file_exists($slugPath)) {
+                $mime = str_ends_with($slugPath, '.mp4')
+                    ? 'video/mp4'
+                    : (str_ends_with($slugPath, '.webp') ? 'image/webp' : 'image/jpeg');
+
+                return response()->file($slugPath, [
+                    'Content-Type' => $mime,
+                    'Cache-Control' => 'public, max-age=31536000, immutable',
+                    'Access-Control-Allow-Origin' => '*',
+                ]);
+            }
         }
     }
 

@@ -89,30 +89,55 @@ class Gesture extends Model
 
     public function imageUrl(): ?string
     {
-        if (! $this->image_path) {
-            return null;
-        }
-
-        // Jalur publik langsung di /images/gestures/... (dijamin 100% aktif di Vercel static router)
-        if (file_exists(public_path('images/'.$this->image_path))) {
+        // 1. Jalur publik langsung jika image_path cocok dengan file statis publik
+        if ($this->image_path && file_exists(public_path('images/'.$this->image_path))) {
             return asset('images/'.$this->image_path);
         }
 
-        return Storage::disk('public')->url($this->image_path);
+        // 2. Fallback cerdas berdasarkan slug jika path di DB rusak / hilang
+        if ($this->slug) {
+            $candidates = [
+                'images/gestures/images/'.$this->slug.'.webp',
+                'images/gestures/images/'.str_replace('-', '_', $this->slug).'.webp',
+                'images/gestures/images/'.str_replace('_', '-', $this->slug).'.webp',
+                'images/gestures/images/'.$this->slug.'.png',
+                'images/gestures/images/'.$this->slug.'.jpg',
+            ];
+            foreach ($candidates as $cand) {
+                if (file_exists(public_path($cand))) {
+                    return asset($cand);
+                }
+            }
+        }
+
+        // 3. Fallback Storage public disk
+        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
     }
 
     public function videoFileUrl(): ?string
     {
-        if (! $this->video_path) {
-            return null;
-        }
-
-        // Jalur publik langsung di /images/gestures/... (dijamin 100% aktif di Vercel static router)
-        if (file_exists(public_path('images/'.$this->video_path))) {
+        // 1. Jalur publik langsung jika video_path cocok dengan file statis publik
+        if ($this->video_path && file_exists(public_path('images/'.$this->video_path))) {
             return asset('images/'.$this->video_path);
         }
 
-        return Storage::disk('public')->url($this->video_path);
+        // 2. Fallback cerdas berdasarkan slug jika path di DB rusak / hilang
+        if ($this->slug) {
+            $candidates = [
+                'images/gestures/videos/'.$this->slug.'.mp4',
+                'images/gestures/videos/'.str_replace('-', '_', $this->slug).'.mp4',
+                'images/gestures/videos/'.str_replace('_', '-', $this->slug).'.mp4',
+                'images/gestures/videos/'.$this->slug.'.webm',
+            ];
+            foreach ($candidates as $cand) {
+                if (file_exists(public_path($cand))) {
+                    return asset($cand);
+                }
+            }
+        }
+
+        // 3. Fallback Storage public disk
+        return $this->video_path ? Storage::disk('public')->url($this->video_path) : null;
     }
 
     protected static function booted(): void
